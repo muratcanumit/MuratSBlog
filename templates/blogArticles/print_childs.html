@@ -1,0 +1,10 @@
+{% if child_list %}
+    <ul>
+        {% for child in child_list %}
+        	{% if parent.id == child.object_id %}
+            	<li><p><i>{{ child.text }} <br /><p>Author : {{child.author}} </p></i></p></li>
+            	{% show_comments child child_list %}
+        	{% endif %}
+        {% endfor %}
+    </ul>
+{% endif %}

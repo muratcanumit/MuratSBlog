@@ -1,0 +1,21 @@
+<hr />
+<h1>{{ post.title }}</h1>
+<p><i>{{ post.text }} <br /><p>Author : {{post.author}} </p></i></p>
+<hr />
+<h4>Comments</h4>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+{% if post_comment_list %}
+     <ul>
+        {% for post_comment in post_comment_list %}
+        	{% if post.id == post_comment.object_id %}
+            	<li><p><i>{{ post_comment.text }} <br /><p>Author : {{post_comment.author}} </p></i></p></li>
+            		{% show_comments post_comment comment_list %}
+        	{% endif %}
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No Comments are available.</p>
+{% endif %}
+<a href="{% url index %}"><input type="submit" value="Home Page" /></a>
+<hr />
