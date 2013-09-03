@@ -1,9 +1,27 @@
+<html>
+<head><title></title></head>
+<body>
+<div>
+<h3>Post Detail Page</h3>
+</div>
+
 <hr />
-<h1>{{ post.title }}</h1>
+
+<div>
+<h3>{{ post.title }}</h3>
+</div>
+
+<hr />
+
+<div>
 <p><i>{{ post.text }} <br /><p>Author : {{post.author}} </p></i></p>
+<a href="{% url index %}"><input type="submit" value="Back to Index Page" /></a>
+</div>
+
 <hr />
+
+<div>
 <h4>Comments</h4>
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 {% if post_comment_list %}
      <ul>
@@ -17,5 +35,7 @@
 {% else %}
     <p>No Comments are available.</p>
 {% endif %}
-<a href="{% url index %}"><input type="submit" value="Home Page" /></a>
+</div>
 <hr />
+</body>
+</html>

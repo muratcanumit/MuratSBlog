@@ -1,4 +1,6 @@
 # Django settings for MuratSBlog project.
+import sys
+import os.path
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -21,7 +23,16 @@ DATABASES = {
         'PORT': '',  # Set to empty string for default. Not used with sqlite3.
     }
 }
+#for absolute path of the project's template, static, media directories
+sys.path.append('/home/Envs/MKF_Blog_Asgn/MuratSBlog',)
+PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'localhost'
+EMAIL_HOST_USER = 'muratsdjangoblog@gmail.com'
+EMAIL_HOST_PASSWORD = 'muratsdjangoblog2013'
+EMAIL_PORT = 25
+EMAIL_USE_TLS = True
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.4/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = []
@@ -51,12 +62,15 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = ''
+MEDIA_ROOT = os.path.join(PROJECT_ROOT, '../uploadedmedia')
+
+print MEDIA_ROOT
+# SOR !!! MEDIA_URL NASIL MATCH EDER ?
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
-MEDIA_URL = ''
+MEDIA_URL = '/uploadedmedia/'
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
@@ -73,6 +87,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    PROJECT_ROOT + '/static/',
 )
 
 # List of finder classes that know how to find static files in
@@ -99,9 +114,13 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
+
+INTERNAL_IPS = ('127.0.0.1',)
 
 ROOT_URLCONF = 'MuratSBlog.urls'
 
@@ -113,6 +132,7 @@ TEMPLATE_DIRS = (
     # or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    PROJECT_ROOT + '/templates/',
     '/home/murat/Envs/MKF_Blog_Asgn/MuratSBlog/templates',
 )
 
@@ -128,6 +148,14 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'blogArticles',
+    'accounts',
+    # for ckeditor in blogArticles POST model RichTextField
+    'ckeditor',
+    'debug_toolbar',
+)
+
+AUTH_PROFILE_MODULE = (
+    'accounts.UserProfile',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -158,3 +186,22 @@ LOGGING = {
         },
     }
 }
+
+CKEDITOR_UPLOAD_PATH = '/home/murat/Envs/MKF_Blog_Asgn/MuratSBlog/uploadedmedia/editor'
+
+
+DEBUG_TOOLBAR_PANELS = (
+    'debug_toolbar.panels.version.VersionDebugPanel',
+    'debug_toolbar.panels.timer.TimerDebugPanel',
+    'debug_toolbar.panels.settings_vars.SettingsVarsDebugPanel',
+    'debug_toolbar.panels.headers.HeaderDebugPanel',
+    'debug_toolbar.panels.request_vars.RequestVarsDebugPanel',
+    'debug_toolbar.panels.template.TemplateDebugPanel',
+    'debug_toolbar.panels.sql.SQLDebugPanel',
+    'debug_toolbar.panels.signals.SignalDebugPanel',
+    'debug_toolbar.panels.logger.LoggingPanel',
+)
+
+AUTHENTICATION_BACKENDS = (
+    'accounts.backends.EmailAuthenticateBackends',
+)
