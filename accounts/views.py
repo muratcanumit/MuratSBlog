@@ -18,12 +18,18 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 
+from django.utils.translation import ugettext as _
+
 from accounts.forms import (LoginForm, RegisterForm,
                             UserProfileForm, EmailChangeForm,
                             PasswordChangeForm, AccountDisableForm)
 
 from django.contrib import messages
 # from tasks import sendmail
+
+
+def osman(request):
+    return HttpResponse("Hello, world. You're at the osman index.")
 
 
 @login_required
@@ -46,19 +52,19 @@ def loginPage(request):
             if user is not None:
                 if user.accounts.is_verified is False:
                     messages.error(request,
-                                   'Verify your account with activation key.')
+                                   _('Verify account with activation key.'))
                 elif user.is_active():
                     login(request, user)
-                    messages.success(request, 'Logged in Successful.')
+                    messages.success(request, _('Logged in Successful.'))
                     return HttpResponseRedirect(reverse('homepage'))
                 else:
                     messages.error(request,
-                                   'Login Failed. This account is inactive.')
+                                   _('Login Failed. Account is inactive.'))
                     return HttpResponseRedirect(reverse('login'))
             else:
                 messages.error(
                     request,
-                    'Login Failed. Wrong Username or Password. Try Again.'
+                    _('Login Failed. Wrong Username or Password. Try Again.')
                 )
                 return HttpResponseRedirect(reverse('login'))
     else:
@@ -80,9 +86,9 @@ def register(request):
             user.create_user(user)
             user.is_active = False
             user.save()
-            messages.success(request, 'Successfully Registered.')
+            messages.success(request, _('Successfully Registered.'))
         else:
-            messages.error(request, 'Fields have to be correctly filled.')
+            messages.error(request, _('Fields have to be correctly filled.'))
             return HttpResponseRedirect(reverse('register'))
     else:
         form = RegisterForm()
@@ -100,11 +106,11 @@ def editProfile(request):
                 user.user_avatar.delete()
             user.user_avatar = user_avatar
             user_avatar.save()
-            messages.success(request, 'Your Avatar has changed.')
+            messages.success(request, _('Your Avatar has changed.'))
             user.save()
-            messages.success(request, 'Changes are done.')
+            messages.success(request, _('Changes are done.'))
         else:
-            messages.error(request, 'Something is wrong.')
+            messages.error(request, _('Something is wrong.'))
             return HttpResponseRedirect(reverse('editprofile'))
     else:
         form = UserProfileForm()
@@ -115,17 +121,18 @@ def editProfile(request):
 def emailChange(request):
     if request.method == 'POST':
         form = EmailChangeForm(request.POST)
-    if form.is_valid():
-        user = request.user.get_profile()
-        user.email = form.save()
-        user.is_verified = False
-        user.is_active = False
-        user.save()
-        messages.success(request, 'Email has changed.Verification is sent.')
-        return HttpResponseRedirect(reverse('index'))
-    else:
-        messages.error(request, 'Process failed. Try again.')
-        form = EmailChangeForm()
+        if form.is_valid():
+            user = request.user.get_profile()
+            user.email = form.save()
+            user.is_verified = False
+            user.is_active = False
+            user.save()
+            messages.success(request,
+                             _('Email is changed. Verification mail sent.'))
+            return HttpResponseRedirect(reverse('index'))
+        else:
+            messages.error(request, _('Process failed. Try again.'))
+            form = EmailChangeForm()
     return render(request, 'emailchange.html', {'form': form})
 
 
@@ -133,18 +140,31 @@ def emailChange(request):
 def passwordChange(request):
     if request.method == 'POST':
         form = PasswordChangeForm(request.POST)
-    if form.is_valid():
-        user = request.user.get_profile()
-        form.save()
-        messages.success(request, 'Email has changed.Verification is sent.')
-        return HttpResponseRedirect(reverse('index'))
-    else:
-        messages.error(request, 'Process failed. Try again.')
-        form = PasswordChangeForm()
+        if form.is_valid():
+            user = request.user.get_profile()
+            user.password = form.save()
+            user.save()
+            messages.success(request,
+                             _('Email has changed. Verification mail sent.'))
+            return HttpResponseRedirect(reverse('index'))
+        else:
+            messages.error(request, _('Process failed. Try again.'))
+            form = PasswordChangeForm()
     return render(request, 'passwordchange.html', {'form': form})
 
 
 @login_required
 def disableAccount(request):
-    user = User.objects.get(request.user)
-
+    if request.method == 'POST':
+        form = AccountDisableForm(request.POST)
+        if form.is_valid():
+            user = User.objects.get(request.user)
+            user.is_active = False
+            user.is_verified = False
+            user.save()
+            messages.success(request, _('Account disabled. Good Bye.'))
+            return HttpResponseRedirect(reverse('index'))
+        else:
+            messages.error(request, _('Process Failed, Try Again.'))
+            form = AccountDisableForm()
+    return render(request, 'accountdisable.html', {'form': form})

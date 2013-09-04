@@ -35,6 +35,7 @@ class Comment(models.Model):
     content_object = generic.GenericForeignKey('content_type', 'object_id')
     # to get sub comments from the parent
     comments = GenericRelation('Comment')
+    is_verified = models.BooleanField(default=False)
 
     def __unicode__(self):
         return u"%s" % self.text

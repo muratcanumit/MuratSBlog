@@ -1,25 +1,27 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 from django.db import models
-from MuratSBlog.accounts.models import UserProfile
 from django import forms
-from django.forms import ModelForm
+
+from accounts.models import UserProfile, GENDER_CHOICES
 from django.forms import widgets
+from django.utils.translation import ugettext as _
 
 
 # Login form for registered users
 class LoginForm(forms.Form):
-    email = forms.EmailField(required=True,
-                             label='EMail',
-                             error_messages={
-                                 'required': "Enter a correct E-mail Address"})
+    email = forms.EmailField(
+        required=True,
+        label='EMail',
+        error_messages={
+            'required': _("Enter a correct E-mail Address")})
 
     password = forms.CharField(widget=forms.PasswordInput,
                                required=True,
                                min_length=6, max_length=11,
                                label='Password',
                                error_messages={
-                                   'required': "Enter correct Password"})
+                                   'required': _("Enter correct Password")})
 
 
 # Registration form for unregistered users
@@ -27,20 +29,21 @@ class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True,
                              label='Email',
                              error_messages={
-                                 'required': "Email field must be filled"})
+                                 'required': _("Email field must be filled")})
 
-    password = forms.CharField(widget=forms.PasswordInput,
-                               required=True,
-                               min_length=6, max_length=11,
-                               label='Password',
-                               help_text='Password must be 6 to 11 characters')
+    password = forms.CharField(
+        widget=forms.PasswordInput,
+        required=True,
+        min_length=6, max_length=11,
+        label=_('Password'),
+        help_text=_('Password must be 6 to 11 characters'))
 
     # Re-Typing the password
     password_rt = forms.CharField(widget=forms.PasswordInput,
                                   required=True,
                                   min_length=6, max_length=11,
-                                  label='Retype Password',
-                                  help_text='Rewrite Your Password')
+                                  label=_('Retype Password'),
+                                  help_text=_('Rewrite Your Password'))
 
     class Meta:
         model = User
@@ -49,27 +52,27 @@ class RegisterForm(UserCreationForm):
                   'password', 'password_rt')
 
     def clean_username(self):
-        username = self.cleaned_data.['username']
+        username = self.cleaned_data['username']
         existing_username = User.objects.get(username=username)
         if existing_username:
-            raise forms.ValidationError("This Username is taken before.")
+            raise forms.ValidationError(_("This Username is taken before."))
 
         return self.cleaned_data['username']
 
     def clean_email(self):
         if UserProfile.is_email_exists(self.cleaned_data['email']):
-            raise forms.ValidationError("Typed an invalid email,"
+            raise forms.ValidationError(_("Typed an invalid email,"
                                         "email might be taken by another"
-                                        "user.")
+                                        "user."))
 
         return self.cleaned_data['email']
 
     def clean_password(self):
-        password = self.cleaned_data.['password']
-        password_rt = self.cleaned_data.['password_rt']
+        password = self.cleaned_data['password']
+        password_rt = self.cleaned_data['password_rt']
 
         if password != password_rt:
-            raise forms.ValidationError("Did not typed password fields same")
+            raise forms.ValidationError(_("Password fields are not same"))
 
         return self.cleaned_data['password']
 
@@ -89,10 +92,10 @@ class UserProfileForm(forms.ModelForm):
         }
 
     def clean_username(self):
-        username = self.cleaned_data.['username']
+        username = self.cleaned_data['username']
         existing_username = User.objects.get(username=username)
         if existing_username:
-            raise forms.ValidationError("This Username is taken before.")
+            raise forms.ValidationError(_("This Username is taken before."))
 
         return self.cleaned_data['username']
 
@@ -102,37 +105,37 @@ class UserProfileForm(forms.ModelForm):
 class EmailChangeForm(forms.Form):
     email = forms.EmailField(
         required=True,
-        label='new-email'
-        help_text='Apply the change with activation key.')
+        label='new-email',
+        help_text=_('Apply the change with activation key.'))
 
     password = forms.CharField(widget=forms.PasswordInput,
                                required=True,
                                min_length=6, max_length=11,
                                label='Password',
-                               help_text='Must be 6 to 11 characters')
+                               help_text=_('Must be 6 to 11 characters'))
 
     password_check = forms.CharField(widget=forms.PasswordInput,
                                      required=True,
                                      min_length=6, max_length=11,
                                      label='Retype-Password',
-                                     help_text='Must be 6 to 11 characters')
+                                     help_text=_('Must be 6 to 11 characters'))
 
     def clean_email(self):
         if UserProfile.is_email_exists(self.cleaned_data['email']):
-            raise forms.ValidationError("You typed an invalid email.")
+            raise forms.ValidationError(_("You typed an invalid email."))
 
         return self.cleaned_data['email']
 
     def clean_password(self):
         # c_password is the users current password
         c_password = UserProfile.objects.get(password=password)
-        c_password = self.cleaned_data.['c_password']
-        password = self.cleaned_data.['password']
-        password_check = self.cleaned_data.['password_check']
+        c_password = self.cleaned_data['c_password']
+        password = self.cleaned_data['password']
+        password_check = self.cleaned_data['password_check']
 
         if c_password != password or password != password_check:
-            raise forms.ValidationError("Typed password fields incorrect")
-        
+            raise forms.ValidationError(_("Typed password fields incorrect"))
+
         return self.cleaned_data['c_password']
 
 
@@ -144,32 +147,32 @@ class PasswordChangeForm(PasswordChangeForm):
                                  required=True,
                                  min_length=6, max_length=11,
                                  label='old-Password',
-                                 help_text='Password must be 6 to 11 Chars',
-                                 verbose_name="old password")
+                                 help_text=_('Password must be 6 to 11 Chars'),
+                                 verbose_name=_("old password"))
 
     new_password = forms.CharField(widget=forms.PasswordInput,
                                    required=True,
                                    min_length=6, max_length=11,
                                    label='New-Password',
-                                   help_text='Rewrite Your Password',
-                                   verbose_name="password")
+                                   help_text=_('Rewrite Your Password'),
+                                   verbose_name=_("password"))
 
     password_check = forms.CharField(widget=forms.PasswordInput,
                                      required=True,
                                      min_length=6, max_length=11,
                                      label='Retype-New-Password',
-                                     help_text='Password Again',
-                                     verbose_name="password again")
+                                     help_text=_('Password Again'),
+                                     verbose_name=_("password again"))
 
     def clean_password(self):
         # current password => c_password
         c_password = UserProfile.objects.get(password=password)
-        c_password = self.cleaned_data.['c_password']
-        new_password = self.cleaned_data.['new_password']
-        password_check = self.cleaned_data.['password_check']
+        c_password = self.cleaned_data['c_password']
+        new_password = self.cleaned_data['new_password']
+        password_check = self.cleaned_data['password_check']
 
-        if c_password = new_password or new_password != password_check:
-            raise forms.ValidationError("Typed your same password for new one")
+        if c_password == new_password or new_password != password_check:
+            raise forms.ValidationError(_("Typed same password for new one"))
 
         return self.cleaned_data['c_password']
 
@@ -179,17 +182,3 @@ class AccountDisableForm(EmailChangeForm):
     class Meta(EmailChangeForm.Meta):
         model = User
         fields = ('email', 'password', 'password_check')
-
-   
-    def save(self, user):
-        user.is_active = False
-        user.save()
-        mail_title = 'Disabling your MuratSBlog account'
-        mail_text = ('Hello! You wanted to disable your account. '
-                     'We disabled your account and this is very unhappy.\n'
-                     'Good Days from MuratSBlog.')
-
-        send_mail(mail_title,
-                  mail_text,
-                  'muratsdjangoblog@gmail.com',
-                  [user.email])

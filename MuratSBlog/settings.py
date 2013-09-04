@@ -1,6 +1,8 @@
 # Django settings for MuratSBlog project.
-import sys
-import os.path
+import os
+
+PROJECT_ROOT = lambda x: os.path.normpath(os.path.join(x, '..'))
+PROJECT_DIR = PROJECT_ROOT(os.path.dirname(__file__))
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -23,9 +25,7 @@ DATABASES = {
         'PORT': '',  # Set to empty string for default. Not used with sqlite3.
     }
 }
-#for absolute path of the project's template, static, media directories
-sys.path.append('/home/Envs/MKF_Blog_Asgn/MuratSBlog',)
-PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
+
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'localhost'
@@ -62,10 +62,7 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = os.path.join(PROJECT_ROOT, '../uploadedmedia')
-
-print MEDIA_ROOT
-# SOR !!! MEDIA_URL NASIL MATCH EDER ?
+MEDIA_ROOT = os.path.join(PROJECT_DIR, 'uploadedmedia')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -76,7 +73,7 @@ MEDIA_URL = '/uploadedmedia/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -87,7 +84,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    PROJECT_ROOT + '/static/',
+    os.path.join(PROJECT_DIR, 'static'),
 )
 
 # List of finder classes that know how to find static files in
@@ -132,8 +129,8 @@ TEMPLATE_DIRS = (
     # or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    PROJECT_ROOT + '/templates/',
-    '/home/murat/Envs/MKF_Blog_Asgn/MuratSBlog/templates',
+    os.path.join(PROJECT_DIR, 'templates'),
+    '/home/murat/Envs/MKF_Blog_Asgn/MuratSBlog/templates/',
 )
 
 INSTALLED_APPS = (
@@ -187,8 +184,14 @@ LOGGING = {
     }
 }
 
-CKEDITOR_UPLOAD_PATH = '/home/murat/Envs/MKF_Blog_Asgn/MuratSBlog/uploadedmedia/editor'
+CKEDITOR_UPLOAD_PATH = os.path.join(PROJECT_DIR, 'uploadedmedia/editor')
 
+DEBUG_TOOLBAR_CONFIG = {
+    'INTERCEPT_REDIRECTS': False,
+    'HIDE_DJANGO_SQL': False,
+    'TAG': 'div',
+    'ENABLE_STACKTRACES': True,
+}
 
 DEBUG_TOOLBAR_PANELS = (
     'debug_toolbar.panels.version.VersionDebugPanel',

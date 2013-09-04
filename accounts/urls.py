@@ -1,7 +1,5 @@
-from django.conf.urls import include, patterns, url
-from blogArticles.models import Post, Comment
+from django.conf.urls import patterns, url
 
 urlpatterns = patterns(
-    'accounts.views',
-    url(r'^$', 'index', name="index"),    
-)
+    '',
+    )

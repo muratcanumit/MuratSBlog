@@ -1,8 +1,8 @@
 # This Class provides to backend of site, When User approach to login form
 # User should type his email instead of the username. Login Form includes only
 # Email and Password fields.
-from django.contrib.auth.models import User, check_password
-from django.accounts.models import UserProfile
+from django.contrib.auth.models import User
+from accounts.models import UserProfile
 
 
 class EmailAuthenticateBackends():
@@ -21,8 +21,8 @@ class EmailAuthenticateBackends():
                         return user
                     else:
                         return None
-                except User.DoesNotExist:
-                    return None
+                except UserProfile.DoesNotExist:
+                    return user
             else:
                 return None
         except User.DoesNotExist:

@@ -30,6 +30,15 @@ class CommentAdmin(admin.ModelAdmin):
 admin.site.register(Comment, CommentAdmin)
 
 
+class UserProfileAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None, {'fields': ['user_avatar', 'birth_date', 'gender',
+                'is_verified', 'act_key', 'exp_key']}),
+    ]
+
+admin.site.register(UserProfile, UserProfileAdmin)
+
+
 class UserProfileInline(admin.StackedInline):
     model = UserProfile
     can_delete = False

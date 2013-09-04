@@ -1,0 +1,19 @@
+<ul>
+{% for comment in comment_list %}
+    <li> {{ comment.text }} </li>
+{% endfor %}
+</ul>
+
+
+<h1>{{ post.title }}</h1>
+<p><i>{{ post.text }} <br /><p>Author : {{post.author}} </p></i></p>
+
+{% if comment_list %}
+     <ul>
+        {% for comment in comment_list %}
+            <li><p><i>{{ comment.text }} <br /><p>Author : {{comment.author}} </p></i></p></li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No Comments are available.</p>
+{% endif %}
