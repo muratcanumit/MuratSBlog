@@ -1,0 +1,7 @@
+Django==1.4.5
+PIL==1.1.7
+argparse==1.2.1
+django-debug-toolbar==0.9.4
+ipdb==0.7
+ipython==1.0.0
+wsgiref==0.1.2
