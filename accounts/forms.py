@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 from django.db import models
 from django import forms
-
+from django.forms import extras
 from accounts.models import UserProfile, GENDER_CHOICES
 from django.forms import widgets
 from django.utils.translation import ugettext as _
@@ -26,30 +26,12 @@ class LoginForm(forms.Form):
 
 # Registration form for unregistered users
 class RegisterForm(UserCreationForm):
-    email = forms.EmailField(required=True,
-                             label='Email',
-                             error_messages={
-                                 'required': _("Email field must be filled")})
-
-    password = forms.CharField(
-        widget=forms.PasswordInput,
-        required=True,
-        min_length=6, max_length=11,
-        label=_('Password'),
-        help_text=_('Password must be 6 to 11 characters'))
-
-    # Re-Typing the password
-    password_rt = forms.CharField(widget=forms.PasswordInput,
-                                  required=True,
-                                  min_length=6, max_length=11,
-                                  label=_('Retype Password'),
-                                  help_text=_('Rewrite Your Password'))
 
     class Meta:
         model = User
         fields = ('first_name', 'last_name',
                   'username', 'email',
-                  'password', 'password_rt')
+                  'password1', 'password2')
 
     def clean_username(self):
         username = self.cleaned_data['username']
@@ -67,19 +49,10 @@ class RegisterForm(UserCreationForm):
 
         return self.cleaned_data['email']
 
-    def clean_password(self):
-        password = self.cleaned_data['password']
-        password_rt = self.cleaned_data['password_rt']
-
-        if password != password_rt:
-            raise forms.ValidationError(_("Password fields are not same"))
-
-        return self.cleaned_data['password']
-
 
 # Profile Informations and extras for registered users
 class UserProfileForm(forms.ModelForm):
-    username = forms.CharField(required=False, label='Username')
+    username = forms.CharField(required=False, label='User name')
     first_name = forms.CharField(required=False, label='First Name')
     last_name = forms.CharField(required=False, label='Last Name')
 
@@ -88,7 +61,8 @@ class UserProfileForm(forms.ModelForm):
         fields = ('username', 'first_name', 'last_name',
                   'user_avatar', 'birth_date', 'gender')
         widgets = {
-            'gender': widgets.Select(choices=GENDER_CHOICES)
+            'gender': widgets.Select(choices=GENDER_CHOICES),
+            'birth_date': extras.SelectDateWidget
         }
 
     def clean_username(self):
@@ -106,19 +80,20 @@ class EmailChangeForm(forms.Form):
     email = forms.EmailField(
         required=True,
         label='new-email',
-        help_text=_('Apply the change with activation key.'))
+        help_text=_('Enter the new email address.'
+                    ' Then, Apply the change with activation key.'))
 
     password = forms.CharField(widget=forms.PasswordInput,
                                required=True,
                                min_length=6, max_length=11,
                                label='Password',
-                               help_text=_('Must be 6 to 11 characters'))
+                               help_text=_('Enter your password'))
 
     password_check = forms.CharField(widget=forms.PasswordInput,
                                      required=True,
                                      min_length=6, max_length=11,
                                      label='Retype-Password',
-                                     help_text=_('Must be 6 to 11 characters'))
+                                     help_text=_('Enter your password again'))
 
     def clean_email(self):
         if UserProfile.is_email_exists(self.cleaned_data['email']):
@@ -141,44 +116,43 @@ class EmailChangeForm(forms.Form):
 
 # User can change Password, have to type actual password once and new one
 # twice, also have to confirm the key which is sent by mail
-class PasswordChangeForm(PasswordChangeForm):
+class PasswordChangeForm(forms.Form):
     # o_password is the user's old password
-    o_password = forms.CharField(widget=forms.PasswordInput,
+    c_password = forms.CharField(widget=forms.PasswordInput,
                                  required=True,
-                                 min_length=6, max_length=11,
                                  label='old-Password',
-                                 help_text=_('Password must be 6 to 11 Chars'),
-                                 verbose_name=_("old password"))
+                                 help_text=_('Enter old-Password'))
+
+    c_password_check = forms.CharField(widget=forms.PasswordInput,
+                                       required=True,
+                                       label='Retype old-Password',
+                                       help_text=_('Again Enter old-Password'))
 
     new_password = forms.CharField(widget=forms.PasswordInput,
                                    required=True,
-                                   min_length=6, max_length=11,
                                    label='New-Password',
-                                   help_text=_('Rewrite Your Password'),
-                                   verbose_name=_("password"))
+                                   help_text=_('Rewrite Your Password'))
 
     password_check = forms.CharField(widget=forms.PasswordInput,
                                      required=True,
                                      min_length=6, max_length=11,
                                      label='Retype-New-Password',
-                                     help_text=_('Password Again'),
-                                     verbose_name=_("password again"))
+                                     help_text=_('New Password Again'))
 
     def clean_password(self):
         # current password => c_password
         c_password = UserProfile.objects.get(password=password)
         c_password = self.cleaned_data['c_password']
+        c_password_check = self.cleaned_data['c_password_check']
         new_password = self.cleaned_data['new_password']
         password_check = self.cleaned_data['password_check']
 
-        if c_password == new_password or new_password != password_check:
+        if c_password != c_password_check:
+            raise forms.ValidationError(_("Typed passwords Wrong."))
+        elif c_password == new_password or new_password != password_check:
             raise forms.ValidationError(_("Typed same password for new one"))
 
         return self.cleaned_data['c_password']
 
 
-class AccountDisableForm(EmailChangeForm):
-
-    class Meta(EmailChangeForm.Meta):
-        model = User
-        fields = ('email', 'password', 'password_check')
+# class AccountDisableForm(forms.Form):

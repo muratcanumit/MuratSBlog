@@ -1,24 +1,16 @@
-from blogArticles.models import Post, Comment
-from accounts.models import UserProfile
-
-from django.http import HttpResponseRedirect, HttpResponse
-# from django.http import Http404
-
+from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, render
-
-from django import template
 from django.template.defaulttags import register
-
 from django.contrib.contenttypes.models import ContentType
-
+from django.contrib import messages
+from django.utils.translation import ugettext as _
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 
-from blogArticles.forms import PostAddForm, CommentAddForm
-from django.contrib import messages
-
-from django.utils.translation import ugettext as _
+from blogArticles.models import Post, Comment
+from blogArticles.forms import PostAddForm
+#, CommentAddForm, AnonCommentAddForm
 
 # from django.core.paginator import Paginator, InvalidPage, EmptyPage
 
@@ -68,9 +60,38 @@ def postAdd(request):
         return render(request, 'postadd.html', {'form': form})
 
 
-def commentAdd(request, user):
-    if request.method == 'POST':
-        if request.user.is_authenticated():
-            form = CommentAddForm(request.POST)
-            form.save(request.user)
-            messages.success(request, _('Comment added!'))
+# def commentAdd(request, comment_to, id):
+#     if comment_to == 'post':
+#         parent = get_object_or_404(Post.objects.select_related(), pk=id)
+#         entity = parent.id
+#     elif comment_to == 'comment':
+#         parent = get_object_or_404(Comment.objects.select_related(
+#             'content_type', 'object_id'), pk=id)
+#         entity = parent.entity_id
+#     else:
+#         return HttpResponseRedirect(reverse('detail'))
+
+#     if request.method == 'POST':
+#         if request.user.is_authenticated():
+#             form = CommentAddForm(request.POST)
+#         else:
+#             form = AnonCommentAddForm
+
+#         if form.is_valid():
+#             form.save(request.user, parent, entity)
+#             if request.user.is_authenticated():
+#                 messages.success(request, _('Comment added!'))
+#             else:
+#                 messages.success(request, _('Verify your comment with key.'))
+#                 return HttpResponseRedirect(reverse('detail'))
+#         else:
+#             messages.error(_('Comment could not added.'))
+#             return HttpResponseRedirect(reverse('detail'))
+#     else:
+#         messages.error(request, _('An error occured.'))
+#         if request.user.is_authenticated():
+#             form = CommentAddForm()
+#         else:
+#             form = AnonCommentAddForm
+
+#     return render(request, 'commentadd.html', {'form': form})

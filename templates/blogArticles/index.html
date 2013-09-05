@@ -6,6 +6,10 @@
 </div>
 
 <hr />
+<div>
+<a href="{% url login %}"><input type="submit" value="Login" /></a><br />
+<a href="{% url register %}"><input type="submit" value="Get Register" /></a><br />
+</div>
 <div>Here are the Recent Posts</div>
 <div>
 {% if latest_post_list %}

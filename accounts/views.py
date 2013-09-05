@@ -1,35 +1,21 @@
-from blogArticles.models import Post, Comment
-from accounts.models import UserProfile
-
-from django.http import HttpResponseRedirect, HttpResponse
-from django.http import Http404
-
+from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
-from django.shortcuts import get_object_or_404, render
-
-from django import template
-from django.template.defaulttags import register
-from django.template import RequestContext
-from django.template import Context, loader
-
-from django.contrib.contenttypes.models import ContentType
-
-
+from django.shortcuts import render
+#, get_object_or_404
+# from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-
+from django.contrib import messages
 from django.utils.translation import ugettext as _
 
+from blogArticles.models import Post
+#, Comment
+# from accounts.models import UserProfile
 from accounts.forms import (LoginForm, RegisterForm,
                             UserProfileForm, EmailChangeForm,
-                            PasswordChangeForm, AccountDisableForm)
-
-from django.contrib import messages
+                            PasswordChangeForm)
 # from tasks import sendmail
-
-
-def osman(request):
-    return HttpResponse("Hello, world. You're at the osman index.")
 
 
 @login_required
@@ -54,7 +40,11 @@ def loginPage(request):
                     messages.error(request,
                                    _('Verify account with activation key.'))
                 elif user.is_active():
+                    user = User.objects.get(user=user)
                     login(request, user)
+                    request.session['user'] = dict(
+                        id=user.id,
+                        is_verified=user.is_verified)
                     messages.success(request, _('Logged in Successful.'))
                     return HttpResponseRedirect(reverse('homepage'))
                 else:
@@ -69,7 +59,7 @@ def loginPage(request):
                 return HttpResponseRedirect(reverse('login'))
     else:
         form = LoginForm
-    return render(request, 'login.html', {'form': form})
+    return render(request, 'accounts/login.html', {'form': form})
 
 
 @login_required
@@ -78,7 +68,7 @@ def logoutPage(request):
     return HttpResponseRedirect('index')
 
 
-def register(request):
+def registerPage(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
@@ -92,7 +82,7 @@ def register(request):
             return HttpResponseRedirect(reverse('register'))
     else:
         form = RegisterForm()
-    return render(request, 'register.html', {'form': form})
+    return render(request, 'accounts/register.html', {'form': form})
 
 
 @login_required
@@ -114,7 +104,7 @@ def editProfile(request):
             return HttpResponseRedirect(reverse('editprofile'))
     else:
         form = UserProfileForm()
-    return render(request, 'editprofile.html', {'form': form})
+    return render(request, 'accounts/editprofile.html', {'form': form})
 
 
 @login_required
@@ -132,8 +122,11 @@ def emailChange(request):
             return HttpResponseRedirect(reverse('index'))
         else:
             messages.error(request, _('Process failed. Try again.'))
+            return HttpResponseRedirect(reverse('changeemail'))
+    else:
+            messages.error(request, _('Process failed. Try again.'))
             form = EmailChangeForm()
-    return render(request, 'emailchange.html', {'form': form})
+    return render(request, 'accounts/emailchange.html', {'form': form})
 
 
 @login_required
@@ -145,26 +138,29 @@ def passwordChange(request):
             user.password = form.save()
             user.save()
             messages.success(request,
-                             _('Email has changed. Verification mail sent.'))
+                             _('Password has changed.Verification mail sent.'))
             return HttpResponseRedirect(reverse('index'))
         else:
             messages.error(request, _('Process failed. Try again.'))
+            return HttpResponseRedirect(reverse('changepassword'))
+    else:
+            messages.error(request, _('Process failed. Try again.'))
             form = PasswordChangeForm()
-    return render(request, 'passwordchange.html', {'form': form})
+    return render(request, 'accounts/passwordchange.html', {'form': form})
 
 
-@login_required
-def disableAccount(request):
-    if request.method == 'POST':
-        form = AccountDisableForm(request.POST)
-        if form.is_valid():
-            user = User.objects.get(request.user)
-            user.is_active = False
-            user.is_verified = False
-            user.save()
-            messages.success(request, _('Account disabled. Good Bye.'))
-            return HttpResponseRedirect(reverse('index'))
-        else:
-            messages.error(request, _('Process Failed, Try Again.'))
-            form = AccountDisableForm()
-    return render(request, 'accountdisable.html', {'form': form})
+# @login_required
+# def disableAccount(request):
+#     if request.method == 'POST':
+#         form = AccountDisableForm(request.POST)
+#         if form.is_valid():
+#             user = User.objects.get(request.user)
+#             user.is_active = False
+#             user.is_verified = False
+#             user.save()
+#             messages.success(request, _('Account disabled. Good Bye.'))
+#             return HttpResponseRedirect(reverse('index'))
+#         else:
+#             messages.error(request, _('Process Failed, Try Again.'))
+#             form = AccountDisableForm()
+#     return render(request, 'accounts/accountdisable.html', {'form': form})

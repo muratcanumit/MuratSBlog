@@ -1,0 +1,16 @@
+<html>
+<head><title></title></head>
+<body>
+<div>
+<h3>Email Change form Page</h3>
+</div>
+<hr />
+<div>
+<form action="/account/change-email/" method="post">
+	{% csrf_token %}
+	{{ form.as_p }}
+	<input type="submit" value="Change Email">
+</form>
+</div>
+</body>
+</html>
