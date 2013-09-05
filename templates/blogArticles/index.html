@@ -10,14 +10,17 @@
 <a href="{% url login %}"><input type="submit" value="Login" /></a><br />
 <a href="{% url register %}"><input type="submit" value="Get Register" /></a><br />
 </div>
+<hr />
 <div>Here are the Recent Posts</div>
 <div>
+<hr />
 {% if latest_post_list %}
     <ul>
     {% for post in latest_post_list %}
         <li><hr /><h1>{{ post.title }}</h1>
             <h4>{{ post.text }}</h4>
             <p>Author: {{ post.author }}</p>
+            <p>{{ post.created_on }}</p>
             <a href="{% url detail post.id %}"><input type="submit" value="Show Detailed" /></a>
         </li><br />
     {% endfor %}

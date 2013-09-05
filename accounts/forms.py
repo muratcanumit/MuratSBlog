@@ -5,7 +5,6 @@ from django.forms import extras
 from accounts.models import UserProfile, GENDER_CHOICES
 from django.forms import widgets
 from django.utils.translation import ugettext as _
-#from django.contrib import messages
 
 
 # Login form for registered users
@@ -28,27 +27,25 @@ class RegisterForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'email',
+        fields = ('username', 'first_name', 'last_name', 'email',
                   'password1', 'password2')
         exclude = ('first_name', 'last_name')
 
-    # def clean_username(self):
-    #     username = self.cleaned_data['username']
-    #        raise forms.ValidationError(_("This Username is taken before."))
-    #     if existing_username:
-    #         raise forms.ValidationError(_("This Username is taken before."))
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        try:
+            User.objects.get(username=username)
+            raise forms.ValidationError(_("This Username is taken before."))
+        except User.DoesNotExist:
+            return username
 
-    #     return self.cleaned_data['username']
-
-    # def clean_email(self):
-    #     email = self.cleaned_data['email']
-    #     existing_email = User.objects.get(email=email)
-    #     if email == existing_email:
-    #         raise forms.ValidationError(_("Typed an invalid email,"
-    #                                     "email might be taken by another"
-    #                                     "user."))
-
-    #     return self.cleaned_data['email']
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        try:
+            User.objects.get(email=email)
+            raise forms.ValidationError(_("This email is taken before."))
+        except User.DoesNotExist:
+            return email
 
     def clean_password(self):
         password1 = self.cleaned_data['password1']
@@ -59,7 +56,7 @@ class RegisterForm(UserCreationForm):
                                         "email might be taken by another"
                                         "user."))
 
-        return self.cleaned_data['email']
+        return self.cleaned_data['password1']
 
 
 # Profile Informations and extras for registered users

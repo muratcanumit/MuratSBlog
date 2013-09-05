@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from ckeditor.fields import RichTextField
+# from ckeditor.fields import RichTextField
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.generic import (GenericForeignKey,
@@ -9,7 +9,7 @@ from django.contrib.contenttypes.generic import (GenericForeignKey,
 
 class Post(models.Model):
     title = models.CharField(max_length=150)
-    text = RichTextField()
+    text = models.TextField()
     author = models.ForeignKey(User)
     post_image = models.ImageField(blank=True, upload_to="postimages")
     created_on = models.DateTimeField(auto_now_add=True)

@@ -46,18 +46,20 @@ def show_comments(parent, comment_list):
     return {'parent': parent, 'child_list': child_list, }
 
 
-@login_required
-def postAdd(request):
-    if request.method == 'POST':
-        form = PostAddForm(request.POST)
-        if form.is_valid():
-            form.save(request.user)
-            messages.success(request, _('Post Added !'))
-            return HttpResponseRedirect(reverse('index'))
-        else:
-            messages.error(request, _('Post was not Added !'))
-            form = PostAddForm()
-        return render(request, 'postadd.html', {'form': form})
+# @login_required
+# def postAdd(request):
+#     if request.method == 'POST':
+#         form = PostAddForm(request.POST)
+#         if form.is_valid():
+#             post = form.save(commit=False)
+#             post.author = request.user
+#             post.save()
+#             messages.success(request, _('Post Added !'))
+#             return HttpResponseRedirect(reverse('homepage'))
+#         else:
+#             messages.error(request, _('Post was not Added !'))
+#             form = PostAddForm()
+#         return render(request, 'blogArticles/postadd.html', {'form': form})
 
 
 # def commentAdd(request, comment_to, id):

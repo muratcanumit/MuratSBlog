@@ -5,7 +5,6 @@ from django.conf.urls import patterns, url
 urlpatterns = patterns(
     'blogArticles.views',
     url(r'^$', 'index', name="index"),
-    url(r'^add-post/$', 'postAdd', name="addpost"),
     url(r'^posts/(?P<post_id>\d+)/detail/$', 'detail', name="detail"),
     # url(r'^authors/(?P<author_username>\w+)/articles/$',
     # 'author', name="author"),

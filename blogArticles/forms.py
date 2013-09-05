@@ -25,28 +25,28 @@ class PostAddForm(forms.ModelForm):
         }
 
 
-# class CommentAddForm(forms.ModelForm):
+class CommentAddForm(forms.ModelForm):
 
-#     class Meta:
-#         model = Comment
-#         fields = ('text')
-#         labels = {'text': "Comment Text"}
+    class Meta:
+        model = Comment
+        fields = ('text')
+        labels = {'text': "Comment Text"}
 
-#     def save(self, request, parent, entity):
-#         comment = Comment(
-#             text=self.cleaned_data['text'],
-#             author=request.user,
-#             entity=entity,
-#             content_type=ContentType.objects.get_for_model(parent),
-#             object_id=parent.id,
-#             is_verified=True,
-#             email=request.user.email)
-#         comment.save()
+    def save(self, request, parent, entity):
+        comment = Comment(
+            text=self.cleaned_data['text'],
+            author=request.user,
+            entity=entity,
+            content_type=ContentType.objects.get_for_model(parent),
+            object_id=parent.id,
+            is_verified=True,
+            email=request.user.email)
+        comment.save()
 
 
 # class AnonCommentAddForm(CommentAddForm):
 #     email = forms.EmailField(required=True, label='email',
-#                              help_text=_('You need to give email to comment.'))
+#                            help_text=_('You need to give email to comment.'))
 
 #     class Meta(CommentAddForm.Meta):
 #         model = Comment

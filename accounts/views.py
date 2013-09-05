@@ -1,23 +1,20 @@
 import datetime
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
-from django.shortcuts import render
-#, get_object_or_404
-# from django.contrib.contenttypes.models import ContentType
+from django.shortcuts import render, get_object_or_404
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.translation import ugettext as _
 
-from blogArticles.models import Post
+from blogArticles.models import Post, Comment
 from accounts.models import UserProfile
-#, Comment
-# from accounts.models import UserProfile
 from accounts.forms import (LoginForm, RegisterForm,
                             UserProfileForm, EmailChangeForm,
                             PasswordChangeForm)
-# from tasks import sendmail
+from blogArticles.forms import PostAddForm
 
 
 @login_required
@@ -26,6 +23,21 @@ def homepage(request):
     users = User.objects.all()
     return render(request, 'blogArticles/homepage.html',
                   {'latest_post_list': latest_post_list, 'users': users})
+
+
+def detailed(request, post_id):
+    p = get_object_or_404(Post, pk=post_id)
+    ct_post = ContentType.objects.get_for_model(Post)
+    post_comments = Comment.objects.filter(entity=post_id).order_by(
+        'created_on').filter(content_type=ct_post)
+
+    ct_comment = ContentType.objects.get_for_model(Comment)
+    comment_list = Comment.objects.filter(entity=post_id).order_by(
+        'created_on').filter(content_type=ct_comment)
+    # return redirect(request, reverse('urls_name'))
+    return render(request, 'blogArticles/postdetailed.html',
+                  {'post': p, 'comment_list': comment_list,
+                   'post_comment_list': post_comments})
 
 
 def loginPage(request):
@@ -66,6 +78,8 @@ def logoutPage(request):
 
 
 def registerPage(request):
+    messages.info(request, _('Your user name will automatically be email.'
+                             'You need to change your username after login.'))
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
@@ -88,8 +102,6 @@ def editProfile(request):
     user = request.user
     if request.method == 'POST':
         form = UserProfileForm(request.POST, request.FILES)
-        print request.POST
-        print form.errors
         if form.is_valid():
             try:
                 userprofile = user.userprofile
@@ -109,10 +121,26 @@ def editProfile(request):
             return HttpResponseRedirect(reverse('homepage'))
         else:
             messages.error(request, _('Edit is failed.'))
-
     else:
         form = UserProfileForm()
     return render(request, 'accounts/profile.html', {'form': form})
+
+
+@login_required
+def postAdd(request):
+    if request.method == 'POST':
+        form = PostAddForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            post.save()
+            messages.success(request, _('Post Added !'))
+            return HttpResponseRedirect(reverse('homepage'))
+        else:
+            messages.error(request, _('Post was not Added !'))
+    else:
+        form = PostAddForm()
+    return render(request, 'blogArticles/postadd.html', {'form': form})
 
 
 @login_required
@@ -152,8 +180,8 @@ def passwordChange(request):
             messages.error(request, _('Process failed. Try again.'))
             return HttpResponseRedirect(reverse('changepassword'))
     else:
-            messages.error(request, _('Process failed. Try again.'))
-            form = PasswordChangeForm()
+        messages.error(request, _('Process failed. Try again.'))
+        form = PasswordChangeForm()
     return render(request, 'accounts/passwordchange.html', {'form': form})
 
 

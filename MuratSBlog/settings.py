@@ -145,8 +145,6 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'blogArticles',
     'accounts',
-    # for ckeditor in blogArticles POST model RichTextField
-    'ckeditor',
     'debug_toolbar',
 )
 
@@ -182,8 +180,6 @@ LOGGING = {
         },
     }
 }
-
-CKEDITOR_UPLOAD_PATH = os.path.join(PROJECT_DIR, 'uploadedmedia/editor')
 
 DEBUG_TOOLBAR_CONFIG = {
     'INTERCEPT_REDIRECTS': False,

@@ -2,14 +2,15 @@
 <head><title></title></head>
 <body>
 <div>
-<h3>edit profile form Page</h3>
+<h3>posting form Page</h3>
 </div>
 <hr />
 <div>
-<form action="/add-post/" method="post">
-	{% csrf_token %}
-	{{ form.as_p }}
-	<input type="submit" value="Add">
+<form enctype="multipart/form-data" action="/homepage/postadd/" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Add">
+    <hr />
 </form>
 </div>
 </body>

@@ -12,6 +12,8 @@ urlpatterns = patterns(
     url(
         r'^account/change-password/$', 'passwordChange', name="changepassword"
     ),
-    url(r'homepage/$', 'homepage', name="homepage"),
-    # url(r'^disable-account/$', 'disableAccount', name="accountdisable"),
+    url(r'^homepage/$', 'homepage', name="homepage"),
+    url(r'^homepage/postadd/$', 'postAdd', name="postadd"),
+    url(r'^homepage/posts/(?P<post_id>\d+)/detailed/$',
+        'detailed', name="detailed"),
 )
