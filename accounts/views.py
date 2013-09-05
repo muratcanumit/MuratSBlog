@@ -1,3 +1,4 @@
+import datetime
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.shortcuts import render
@@ -10,6 +11,7 @@ from django.contrib import messages
 from django.utils.translation import ugettext as _
 
 from blogArticles.models import Post
+from accounts.models import UserProfile
 #, Comment
 # from accounts.models import UserProfile
 from accounts.forms import (LoginForm, RegisterForm,
@@ -21,51 +23,46 @@ from accounts.forms import (LoginForm, RegisterForm,
 @login_required
 def homepage(request):
     latest_post_list = Post.objects.all().order_by('-created_on')[:10]
+    users = User.objects.all()
     return render(request, 'blogArticles/homepage.html',
-                  {'latest_post_list': latest_post_list})
+                  {'latest_post_list': latest_post_list, 'users': users})
 
 
 def loginPage(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
-            username = request.POST.get('username')
+            username = request.POST.get('email')
             password = request.POST.get('password')
             user = authenticate(username=username,
                                 password=password
                                 )
 
             if user is not None:
-                if user.accounts.is_verified is False:
+                if user.is_active is False:
                     messages.error(request,
                                    _('Verify account with activation key.'))
-                elif user.is_active():
-                    user = User.objects.get(user=user)
+                    return HttpResponseRedirect(reverse('login'))
+                elif user.is_active is True:
                     login(request, user)
-                    request.session['user'] = dict(
-                        id=user.id,
-                        is_verified=user.is_verified)
                     messages.success(request, _('Logged in Successful.'))
                     return HttpResponseRedirect(reverse('homepage'))
-                else:
-                    messages.error(request,
-                                   _('Login Failed. Account is inactive.'))
-                    return HttpResponseRedirect(reverse('login'))
+
             else:
                 messages.error(
                     request,
-                    _('Login Failed. Wrong Username or Password. Try Again.')
+                    _('Login Failed. Invalid Username or Password. Try Again.')
                 )
                 return HttpResponseRedirect(reverse('login'))
     else:
-        form = LoginForm
+        form = LoginForm()
     return render(request, 'accounts/login.html', {'form': form})
 
 
 @login_required
 def logoutPage(request):
     logout(request)
-    return HttpResponseRedirect('index')
+    return HttpResponseRedirect('/')
 
 
 def registerPage(request):
@@ -73,10 +70,11 @@ def registerPage(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
-            user.create_user(user)
             user.is_active = False
+            user.username = user.email
             user.save()
             messages.success(request, _('Successfully Registered.'))
+            return HttpResponseRedirect(reverse('login'))
         else:
             messages.error(request, _('Fields have to be correctly filled.'))
             return HttpResponseRedirect(reverse('register'))
@@ -87,24 +85,34 @@ def registerPage(request):
 
 @login_required
 def editProfile(request):
+    user = request.user
     if request.method == 'POST':
-        form = UserProfileForm(request.POST)
+        form = UserProfileForm(request.POST, request.FILES)
+        print request.POST
+        print form.errors
         if form.is_valid():
-            user = request.user.get_profile()
-            user_avatar = request.FILES.get("user_avatar")
-            if user_avatar is not None:
-                user.user_avatar.delete()
-            user.user_avatar = user_avatar
-            user_avatar.save()
-            messages.success(request, _('Your Avatar has changed.'))
+            try:
+                userprofile = user.userprofile
+            except UserProfile.DoesNotExist:
+                userprofile = form.instance
+
+            userprofile.user = user
+            userprofile.is_verified = True
+            userprofile.act_key = "1111"
+            userprofile.exp_key = datetime.datetime.now()
+            user.username = form.cleaned_data['username']
+            user.first_name = form.cleaned_data['first_name']
+            user.last_name = form.cleaned_data['last_name']
             user.save()
+            userprofile.save()
             messages.success(request, _('Changes are done.'))
+            return HttpResponseRedirect(reverse('homepage'))
         else:
-            messages.error(request, _('Something is wrong.'))
-            return HttpResponseRedirect(reverse('editprofile'))
+            messages.error(request, _('Edit is failed.'))
+
     else:
         form = UserProfileForm()
-    return render(request, 'accounts/editprofile.html', {'form': form})
+    return render(request, 'accounts/profile.html', {'form': form})
 
 
 @login_required

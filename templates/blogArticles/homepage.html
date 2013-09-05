@@ -1,0 +1,31 @@
+<html>
+<head><title></title></head>
+<body>
+<div>
+<h3>Murat Can Umit Index Page</h3>
+</div>
+
+<hr />
+<div>
+<a href="{% url profile %}"><input type="submit" value="Profile" /></a><br />
+<a href="{% url logout %}"><input type="submit" value="Logout" /></a><br />
+</div>
+<div><b><p>Here are the Recent Posts | <<p></b> {{ user }} </div>
+<div>
+{% if latest_post_list %}
+    <ul>
+    {% for post in latest_post_list %}
+        <li><hr /><h1>{{ post.title }}</h1>
+            <h4>{{ post.text }}</h4>
+            <p>Author: {{ post.author }}</p>
+            <a href="{% url detail post.id %}"><input type="submit" value="Show Detailed" /></a>
+        </li><br />
+    {% endfor %}
+    </ul>
+    <hr />
+{% else %}
+    <p>No Posts are available.</p>
+{% endif %}
+</div>
+</body>
+</html>

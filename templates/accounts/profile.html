@@ -1,0 +1,39 @@
+<html>
+<head><title></title></head>
+<body>
+<div>
+<h3> profile Page</h3>
+</div>
+<hr /> 
+<div>
+<i><h3>Profile Info</h3></i>
+<ul>
+	<li>User Name : {{ user.username }}</li>
+	<li>E-Mail Address : {{ user.email }}</li>
+	<li>Profile Picture : <br /><img src="/uploadedmedia/{{ user.userprofile.user_avatar}}" width="128"/>
+</li>
+</ul>
+</div>
+<hr />
+<div>
+<h3> Edit Your Info </h3>
+{% if messages %}
+	<ul class="messages">
+		{% for message in messages %}
+			<li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+		{% endfor %}
+	</ul>
+{% endif %}
+<form enctype="multipart/form-data" action="/account/profile/" method="post">
+	{% csrf_token %}
+	{{ form.as_p }}
+	<input type="submit" value="Submit Changes">
+</form>
+<hr />
+<a href=""><input type="submit" value="Change Password" /></a><br />
+<a href=""><input type="submit" value="Change Email" /></a><br />
+<hr />
+<a href="{% url homepage %}"><input type="submit" value="Back to Home Page" /></a><br />
+</div>
+</body>
+</html>
