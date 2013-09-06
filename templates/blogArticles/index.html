@@ -20,6 +20,7 @@
         <li><hr /><h1>{{ post.title }}</h1>
             <h4>{{ post.text }}</h4>
             <p>Author: {{ post.author }}</p>
+            <img src="/uploadedmedia/{{ user.userprofile.user_avatar}}" width="128"/>
             <p>{{ post.created_on }}</p>
             <a href="{% url detail post.id %}"><input type="submit" value="Show Detailed" /></a>
         </li><br />

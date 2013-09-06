@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
+from django.contrib.auth.forms import UserCreationForm
+# , PasswordChangeForm
 from django import forms
 from django.forms import extras
 from accounts.models import UserProfile, GENDER_CHOICES
@@ -83,8 +84,8 @@ class UserProfileForm(forms.ModelForm):
             return username
 
 
-# User can change email address, have to type password twice and
-# confirm the key which is sent by mail
+#User can change email address, have to type password twice and
+#confirm the key which is sent by mail
 class EmailChangeForm(forms.Form):
     email = forms.EmailField(
         required=True,
@@ -103,22 +104,21 @@ class EmailChangeForm(forms.Form):
                                      help_text=_('Enter your password again'))
 
     def clean_email(self):
-        if UserProfile.is_email_exists(self.cleaned_data['email']):
+        if User.is_email_exists(self.cleaned_data['email']):
             raise forms.ValidationError(_("You typed an invalid email."))
 
         return self.cleaned_data['email']
 
-    # def clean_password(self):
-    #     # c_password is the users current password
-    #     c_password = UserProfile.objects.get(password=password)
-    #     c_password = self.cleaned_data['c_password']
-    #     password = self.cleaned_data['password']
-    #     password_check = self.cleaned_data['password_check']
+    def clean_password(self, user, request):
 
-    #     if c_password != password or password != password_check:
-    #         raise forms.ValidationError(_("Typed password fields incorrect"))
-
-    #     return self.cleaned_data['c_password']
+        u = User.objects.get(username__exact=user.request.username)
+        password = self.cleaned_data['password']
+        password_check = self.cleaned_data['password_check']
+        if password != password_check:
+            raise forms.ValidationError(_("Typed password fields incorrect"))
+        elif u.check_password(password):
+            raise forms.ValidationError(_('Typed wrong password'))
+        return self.cleaned_data['password']
 
 
 # User can change Password, have to type actual password once and new one
@@ -145,21 +145,21 @@ class PasswordChangeForm(forms.Form):
                                      label='Retype-New-Password',
                                      help_text=_('New Password Again'))
 
-    # def clean_password(self):
-    #     # current password => c_password
-    #     c_password = UserProfile.objects.get(
-    #         password=self.cleaned_data['c_password'])
-    #     # c_password = self.cleaned_data['c_password']
-    #     c_password_check = self.cleaned_data['c_password_check']
-    #     new_password = self.cleaned_data['new_password']
-    #     password_check = self.cleaned_data['password_check']
+    def clean_password(self):
+        # current password => c_password
+        c_password = UserProfile.objects.get(
+            password=self.cleaned_data['c_password'])
+        # c_password = self.cleaned_data['c_password']
+        c_password_check = self.cleaned_data['c_password_check']
+        new_password = self.cleaned_data['new_password']
+        password_check = self.cleaned_data['password_check']
 
-    #     if c_password != c_password_check:
-    #         raise forms.ValidationError(_("Typed passwords Wrong."))
-    #     elif c_password == new_password or new_password != password_check:
-    #         raise forms.ValidationError(_("Typed same password for new one"))
+        if c_password != c_password_check:
+            raise forms.ValidationError(_("Typed passwords Wrong."))
+        elif c_password == new_password or new_password != password_check:
+            raise forms.ValidationError(_("Typed same password for new one"))
 
-    #     return self.cleaned_data['c_password']
+        return self.cleaned_data['c_password']
 
 
 # class AccountDisableForm(forms.Form):

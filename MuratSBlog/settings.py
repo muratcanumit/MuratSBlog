@@ -18,7 +18,7 @@ DATABASES = {
         # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'ENGINE': 'django.db.backends.sqlite3',
         # Or path to database file if using sqlite3.
-        'NAME': '/home/murat/Envs/MKF_Blog_Asgn/MuratSBlog/MuratSBlog.db',
+        'NAME': os.path.join(PROJECT_DIR, 'MuratSBlog.db'),
         'USER': '',  # Not used with sqlite3.
         'PASSWORD': '',  # Not used with sqlite3.
         'HOST': '',  # Set to empty string for localhost.Not used with sqlite3.

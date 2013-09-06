@@ -21,8 +21,12 @@
     <ul>
     {% for post in latest_post_list %}
         <li><hr /><h1>{{ post.title }}</h1>
+            {% if post_image %}
+                <br /><img src="/uploadedmedia/{{ post.post_image }}" width="200"/><br />
+            {% endif %}
             <h4>{{ post.text }}</h4>
             <p>Author: {{ post.author }}</p>
+            <img src="/uploadedmedia/{{ user.userprofile.user_avatar}}" width="128"/>
             <p>{{ post.created_on }}</p>
             <a href="{% url detailed post.id %}"><input type="submit" value="Show Detailed" /></a>
         </li><br />
