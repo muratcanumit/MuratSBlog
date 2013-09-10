@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load url from future %}
+
+{% block title %}Page Not Found | 404{% endblock %}
+{% block navbar %}{% endblock %}
+
+{% block content %}
+        <h3>{% trans "We Screwed Mate." %}</h3><br />
+        <p>{% trans "500 INTERNAL SERVER ERROR" %}</p>
+{% endblock %}
+
+{% block sidebar %}{% endblock %}
+{% block footer %}{% endblock %}
