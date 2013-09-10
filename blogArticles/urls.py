@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
 # from blogArticles.models import Post, Comment
-
+from MuratSBlog import settings
 
 urlpatterns = patterns(
     'blogArticles.views',

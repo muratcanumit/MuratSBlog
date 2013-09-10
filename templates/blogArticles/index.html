@@ -1,35 +1,32 @@
-<html>
-<head><title></title></head>
-<body>
-<div>
-<h3>Murat Can Umit Index Page</h3>
-</div>
+{% extends "base.html" %}
+{% load i18n %}
+{% load url from future %}
 
-<hr />
-<div>
-<a href="{% url login %}"><input type="submit" value="Login" /></a><br />
-<a href="{% url register %}"><input type="submit" value="Get Register" /></a><br />
-</div>
-<hr />
-<div>Here are the Recent Posts</div>
-<div>
-<hr />
+{% block content %}
 {% if latest_post_list %}
     <ul>
     {% for post in latest_post_list %}
-        <li><hr /><h1>{{ post.title }}</h1>
-            <h4>{{ post.text }}</h4>
-            <p>Author: {{ post.author }}</p>
-            <img src="/uploadedmedia/{{ user.userprofile.user_avatar}}" width="128"/>
-            <p>{{ post.created_on }}</p>
-            <a href="{% url detail post.id %}"><input type="submit" value="Show Detailed" /></a>
-        </li><br />
+        <hr />
+        <h3><a href="">{{ post.title }}</a></h3>
+        <p>{% trans "Written by" %} <a href="">{{ post.author }}</a> on {{ post.created_on }}</p>
+        <div class="row">
+          <div class="large-6 columns">
+            <p>{{ post.text }}</p>
+          </div>
+          <div class="large-6 columns">
+            <img src="http://placehold.it/400x240&text=[img]" />
+          </div>
+        </div>
+
+            <h5><a href="">{% trans "Read More" %}</a></h5>
+        <br />
     {% endfor %}
     </ul>
     <hr />
 {% else %}
     <p>No Posts are available.</p>
 {% endif %}
-</div>
-</body>
-</html>
+{% endblock %}
+
+
+

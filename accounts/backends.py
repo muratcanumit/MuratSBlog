@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from accounts.models import UserProfile
 
 
-class EmailAuthenticateBackends():
+class EmailAuthenticateBackends(object):
     def authenticate(self, username=None, password=None):
         try:
             user = User.objects.get(email=username)

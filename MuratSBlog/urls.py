@@ -1,16 +1,26 @@
+from django.conf import settings
 from django.conf.urls import patterns, include, url
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib import admin
 admin.autodiscover()
-from MuratSBlog import settings
-from django.conf.urls.static import static
 
-handler404 = 'blogArticles.errorviews.errorView404'
-handler500 = 'blogArticles.errorviews.errorView500'
 
 urlpatterns = patterns(
     '',
     url(r'^admin/', include(admin.site.urls)),
-    # url(r'^ckeditor/', include('ckeditor.urls')),
     url(r'^', include('blogArticles.urls')),
     url(r'^', include('accounts.urls')),
-) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+)
+
+if settings.DEBUG is True:
+    urlpatterns = patterns(
+        '',
+        url(r'^uploadedmedia/(?P<path>.*)$',
+            'django.views.static.serve',
+            {'document_root': settings.MEDIA_ROOT}),
+    ) + urlpatterns
+
+urlpatterns += staticfiles_urlpatterns()
+
+handler404 = 'MuratSBlog.views.handler404'
+handler500 = 'MuratSBlog.views.handler500'

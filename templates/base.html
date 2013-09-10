@@ -1,41 +1,43 @@
 {% load i18n %}
+{% load url from future %}
 <!DOCTYPE html>
 <!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
 <!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
-<html>
 <head>
   <meta charset="utf-8" />
 
   <!-- Set the viewport width to device width for mobile -->
   <meta name="viewport" content="width=device-width" />
 
-  <title>{% block title %}MURATSBLOG{% endblock}</title>
-{% block css %}
-  <link rel="stylesheet" href="css/normalize.css">
-  <link rel="stylesheet" href="css/foundation.css">
-{% endblock css%}
-{% block js %}
-  <script src="js/vendor/custom.modernizr.js"></script>
-{% endblock js %}
+  <title>{% block title %} Murat Can Ümit | Blog {% endblock %}</title>
+  {% block css %}
+  <link rel="stylesheet" href="{{ STATIC_URL }}css/normalize.css">
+  <link rel="stylesheet" href="{{ STATIC_URL }}css/foundation.css">
+  {% endblock %} 
+  {% block js %}
+  <script src="{{ STATIC_URL }}js/vendor/custom.modernizr.js"></script>
+  {% endblock %}
 </head>
 <body class="bodyextras">
-{% block navbar %}
+
   <!-- Nav Bar -->
 
   <div class="row">
+    {% block navbar %}
     <div class="large-12 columns">
       <div class="nav-bar right">
        <ul class="button-group">
-         <li><a href="#" class="button">Link 1</a></li>
-         <li><a href="#" class="button">Link 2</a></li>
-         <li><a href="#" class="button">Link 3</a></li>
-         <li><a href="#" class="button">Link 4</a></li>
+         <li><a href="" class="button">{% trans "Home" %}</a></li>
+         <li><a href="" class="button">{% trans "About" %}</a></li>
+         <li><a href="" class="button">Blog</a></li>
+         <li><a href="" class="button">{% trans "Contact" %}</a></li>
         </ul>
       </div>
-      <h1>Blog <small>This is my blog. It's awesome.</small></h1>
+      <h2>{% block headline %} Murat Can Ümit |<small> BLOG </small> {% endblock %} </h2>
       <hr />
     </div>
+    {% endblock %}
   </div>
 
   <!-- End Nav -->
@@ -47,77 +49,57 @@
 
     <!-- Main Blog Content -->
     <div class="large-9 columns" role="content">
-
+      {% block content %}
       <article>
 
-        <h3><a href="#">Blog Post Title</a></h3>
-        <h6>Written by <a href="#">John Smith</a> on August 12, 2012.</h6>
+        <h3><a href=""></a></h3>
+        <h6><a href=""></a></h6>
 
         <div class="row">
           <div class="large-6 columns">
-            <p>Bacon ipsum dolor sit amet nulla ham qui sint exercitation eiusmod commodo, chuck duis velit. Aute in reprehenderit, dolore aliqua non est magna in labore pig pork biltong. Eiusmod swine spare ribs reprehenderit culpa.</p>
-            <p>Boudin aliqua adipisicing rump corned beef. Nulla corned beef sunt ball tip, qui bresaola enim jowl. Capicola short ribs minim salami nulla nostrud pastrami.</p>
+            <p></p>
           </div>
           <div class="large-6 columns">
             <img src="http://placehold.it/400x240&text=[img]" />
           </div>
         </div>
 
-        <p>Pork drumstick turkey fugiat. Tri-tip elit turducken pork chop in. Swine short ribs meatball irure bacon nulla pork belly cupidatat meatloaf cow. Nulla corned beef sunt ball tip, qui bresaola enim jowl. Capicola short ribs minim salami nulla nostrud pastrami. Nulla corned beef sunt ball tip, qui bresaola enim jowl. Capicola short ribs minim salami nulla nostrud pastrami.</p>
+        <p></p>
 
-        <p>Pork drumstick turkey fugiat. Tri-tip elit turducken pork chop in. Swine short ribs meatball irure bacon nulla pork belly cupidatat meatloaf cow. Nulla corned beef sunt ball tip, qui bresaola enim jowl. Capicola short ribs minim salami nulla nostrud pastrami.</p>
+        <p></p>
 
+            <h6><a href=""></a></h6>
       </article>
 
       <hr />
-
-      <article>
-
-        <h3><a href="#">Blog Post Title</a></h3>
-        <h6>Written by <a href="#">John Smith</a> on August 12, 2012.</h6>
-
-        <div class="row">
-          <div class="large-6 columns">
-            <p>Bacon ipsum dolor sit amet nulla ham qui sint exercitation eiusmod commodo, chuck duis velit. Aute in reprehenderit, dolore aliqua non est magna in labore pig pork biltong. Eiusmod swine spare ribs reprehenderit culpa.</p>
-            <p>Boudin aliqua adipisicing rump corned beef. Nulla corned beef sunt ball tip, qui bresaola enim jowl. Capicola short ribs minim salami nulla nostrud pastrami.</p>
-          </div>
-          <div class="large-6 columns">
-            <img src="http://placehold.it/400x240&text=[img]" />
-          </div>
-        </div>
-
-        <p>Pork drumstick turkey fugiat. Tri-tip elit turducken pork chop in. Swine short ribs meatball irure bacon nulla pork belly cupidatat meatloaf cow. Nulla corned beef sunt ball tip, qui bresaola enim jowl. Capicola short ribs minim salami nulla nostrud pastrami. Nulla corned beef sunt ball tip, qui bresaola enim jowl. Capicola short ribs minim salami nulla nostrud pastrami.</p>
-
-        <p>Pork drumstick turkey fugiat. Tri-tip elit turducken pork chop in. Swine short ribs meatball irure bacon nulla pork belly cupidatat meatloaf cow. Nulla corned beef sunt ball tip, qui bresaola enim jowl. Capicola short ribs minim salami nulla nostrud pastrami.</p>
-
-      </article>
-
+      {% endblock %}
     </div>
 
     <!-- End Main Content -->
 
 
     <!-- Sidebar -->
-
+  <div>
+    {% block sidebar %}
     <aside class="large-3 columns">
-
-      <h5>Categories</h5>
+      {% block categories %}
       <ul class="side-nav">
-        <li><a href="#">News</a></li>
-        <li><a href="#">Code</a></li>
-        <li><a href="#">Design</a></li>
-        <li><a href="#">Fun</a></li>
-        <li><a href="#">Weasels</a></li>
+        <li><h4><a href="">{% trans "Login" %}</a></h4></li>
+        <li><h4><a href="">{% trans "Register" %}</a></h4></li>
+        <li><h4><a href="">{% trans "All Articles" %}</a></h4></li>
+        <li><h4><a href="">{% trans "Terms of Use" %}</a></h4></li>
       </ul>
 
       <div class="panel">
-        <h5>Featured</h5>
-        <p>Pork drumstick turkey fugiat. Tri-tip elit turducken pork chop in. Swine short ribs meatball irure bacon nulla pork belly cupidatat meatloaf cow.</p>
-        <a href="#">Read More &rarr;</a>
+        {% block panel %}
+        <h5>News</h5>
+        <p>Blog Assignment with using Django Framework v1.4.5 and Python Programming Language. Also, there is HTML,CSS and JS.</p>
+        <!--<a href="">Read More &rarr;</a>-->
+        {% endblock %}
       </div>
-
+      {% endblock %}
     </aside>
-
+    {% endblock %}
     <!-- End Sidebar -->
   </div>
 
@@ -127,34 +109,37 @@
   <!-- Footer -->
 
   <footer class="row">
+    {% block footer %}
     <div class="large-12 columns">
       <hr />
       <div class="row">
         <div class="large-6 columns">
-          <p>&copy; Copyright no one at all. Go to town.</p>
+          <p style="color:#ecf0f1">&copy; www.muratcanumit.com</p>
         </div>
         <div class="large-6 columns">
           <ul class="inline-list right">
-            <li><a href="#">Link 1</a></li>
-            <li><a href="#">Link 2</a></li>
-            <li><a href="#">Link 3</a></li>
-            <li><a href="#">Link 4</a></li>
+            <li><a href="">{% trans "Authors" %}</a></li>
+            <li><a href="">{% trans "Partners" %}</a></li>
+            <li><a href="">{% trans "Links" %}</a></li>
+            <li><a href="">{% trans "Social" %}</a></li>
           </ul>
         </div>
       </div>
     </div>
+    {% endblock %}
   </footer>
-
+  {% block jsvendor %}
   <script>
-  document.write('<script src=js/vendor/' +
+  document.write('<script src={{ STATIC_URL }}js/vendor/' +
   ('__proto__' in {} ? 'zepto' : 'jquery') +
   '.js><\/script>')
   </script>
-  <script src="js/foundation.min.js"></script>
+  <script src="{{ STATIC_URL }}js/foundation.min.js"></script>
   <script>
     $(document).foundation();
   </script>
-
+  {% endblock %}
   <!-- End Footer -->
 </body>
 </html>
+
