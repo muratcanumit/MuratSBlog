@@ -1,23 +1,40 @@
-<html>
-<head><title></title></head>
-<body>
-<div>
-<h3>register form Page</h3>
-</div>
-<hr />
-<div>
-{% if messages %}
-	<ul class="messages">
-		{% for message in messages %}
-			<li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-		{% endfor %}
-	</ul>
-{% endif %}
-<form action="/register/" method="post">
-	{% csrf_token %}
-	{{ form.as_p }}
-	<input type="submit" value="Register">
-</form>
-</div>
-</body>
-</html>
+
+{% extends "base.html" %}
+{% load i18n %}
+{% load url from future %}
+
+
+{% block content %}
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <p>{% trans "REGISTRATION" %}</p>
+
+    <form action="/register/" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Register">
+    </form>
+
+    <hr />
+
+{% endblock %}
+
+{% block sidebar %}
+
+    <aside class="large-3 columns">
+    {% block categories %}
+            <ul class="side-nav">
+                <li><h4><a href="{% url 'login' %}">{% trans "Login" %}</a></h4></li>
+                <li><h4><a href="{% url 'register' %}">{% trans "Register" %}</a></h4></li>
+                <li><h4><a href="{% url 'all_articles' %}">{% trans "All Articles" %}</a></h4></li>
+                <li><h4><a href="{% url 'terms_of_use' %}">{% trans "Terms of Use" %}</a></h4></li>
+            </ul>
+        {% endblock %}
+    </aside>
+{% endblock %}

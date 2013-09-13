@@ -1,43 +1,68 @@
-<html>
-<head><title></title></head>
-<body>
-<div>
-<h3>Post Detail Page</h3>
-</div>
 
-<hr />
 
-<div>
-<h3>{{ post.title }}</h3>
-</div>
+{% extends "base.html" %}
+{% load i18n %}
+{% load url from future %}
 
-<hr />
 
-<div>
-<p><i>{{ post.text }} <br />
-<p>Author : {{post.author}} </p></i></p>
-<p>{{ post.created_on }}</p>
-<a href="{% url index %}"><input type="submit" value="Back to Index Page" /></a>
-</div>
+{% block content %}
+    <h3><a href="">{{ post.title }}</a></h3>
+    <p><i>{% trans "Posted by" %} <a href="">{{ post.author.get_full_name }}</a> on {{ post.created_on }}</i></p>
+    <div class="row">
+        <div class="large-6 columns">
+            <p>{{ post.text }}</p><hr />
 
-<hr />
+            <p>Comments</p><hr />
 
-<div>
-<h4>Comments</h4>
+			{% if post_comment_list %}
+     			<ul>
+        		{% for post_comment in post_comment_list %}
+        			{% if post.id == post_comment.object_id %}
+            			<li><p><i>{{ post_comment.text }} <br /><p>Comment Author : {{post_comment.author.get_full_name}} </p></i></p></li>
+            			{% show_comments post_comment comment_list %}
+        			{% endif %}
+        		{% endfor %}
+    			</ul>
+			{% else %}
+    			<p>No Comments are available.</p>
+			{% endif %}
+        </div>
+    	<div class="large-6 columns">
+        	
+    	</div>
+    </div>
+{% endblock %}
 
-{% if post_comment_list %}
-     <ul>
-        {% for post_comment in post_comment_list %}
-        	{% if post.id == post_comment.object_id %}
-            	<li><p><i>{{ post_comment.text }} <br /><p>Author : {{post_comment.author}} </p></i></p></li>
-            		{% show_comments post_comment comment_list %}
-        	{% endif %}
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No Comments are available.</p>
-{% endif %}
-</div>
-<hr />
-</body>
-</html>
+
+{% block sidebar %}
+
+    <aside class="large-3 columns">
+    {% block categories %}
+        {% if user.is_authenticated %}
+            <ul class="side-nav">
+                <li><h4><a href="{% url 'postadd' %}">{% trans "Add Post" %}</a></h4></li>
+                <li><h4><a href="{% url 'logout' %}">{% trans "Logout" %}</a></h4></li>
+                <li><h4><a href="{% url 'profile' %}">{% trans "Profile" %}</a></h4></li>
+                <li><h4><a href="{% url 'index' %}">{% trans "Homepage" %}</a></h4></li>
+                <li><h4><a href="{% url 'all_articles' %}">{% trans "All Articles" %}</a></h4></li>
+                <li><h4><a href="{% url 'terms_of_use' %}">{% trans "Terms of Use" %}</a></h4></li>
+            </ul>
+        {% else %}
+            <ul class="side-nav">
+                <li><h4><a href="{% url 'login' %}">{% trans "Login" %}</a></h4></li>
+                <li><h4><a href="{% url 'register' %}">{% trans "Register" %}</a></h4></li>
+                <li><h4><a href="{% url 'index' %}">{% trans "Homepage" %}</a></h4></li>
+                <li><h4><a href="{% url 'all_articles' %}">{% trans "All Articles" %}</a></h4></li>
+                <li><h4><a href="{% url 'terms_of_use' %}">{% trans "Terms of Use" %}</a></h4></li>
+            </ul>
+        {% endif %}
+        <div class="panel">
+        {% block panel %}
+            <h5>News</h5>
+            <p>Blog Assignment with using Django Framework v1.4.5 and Python Programming Language. Also, there is HTML,CSS and JS.</p>
+             <!--<a href="">Read More &rarr;</a>-->
+        {% endblock %}
+        </div>
+        {% endblock %}
+    </aside>
+{% endblock %}

@@ -1,6 +1,5 @@
+import datetime
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
-# , PasswordChangeForm
 from django import forms
 from django.forms import extras
 from accounts.models import UserProfile, GENDER_CHOICES
@@ -12,154 +11,132 @@ from django.utils.translation import ugettext as _
 class LoginForm(forms.Form):
     email = forms.EmailField(
         required=True,
-        label='EMail',
+        label=_('EMail'),
         error_messages={
             'required': _("Enter a correct E-mail Address")})
 
     password = forms.CharField(widget=forms.PasswordInput,
                                required=True,
-                               label='Password',
+                               label=_('Password'),
                                error_messages={
                                    'required': _("Enter correct Password")})
 
 
 # Registration form for unregistered users
-class RegisterForm(UserCreationForm):
+class RegisterForm(forms.ModelForm):
+    username = forms.CharField(required=False, label=_('Username'))
+
+    first_name = forms.CharField(required=False, label=_('First Name'))
+
+    last_name = forms.CharField(required=False, label=_('Last Name'))
+
+    email = forms.EmailField(required=True, label=_('Email'))
+
+    password = forms.CharField(widget=forms.PasswordInput,
+                               required=True,
+                               label=_('Password'))
+
+    password2 = forms.CharField(widget=forms.PasswordInput,
+                                required=True,
+                                label=_('Password Again'))
 
     class Meta:
         model = User
-        fields = ('username', 'first_name', 'last_name', 'email',
-                  'password1', 'password2')
-        exclude = ('first_name', 'last_name')
-
-    def clean_username(self):
-        username = self.cleaned_data['username']
-        try:
-            User.objects.get(username=username)
-            raise forms.ValidationError(_("This Username is taken before."))
-        except User.DoesNotExist:
-            return username
+        fields = ('username', 'first_name',
+                  'last_name', 'email', 'password', 'password2')
 
     def clean_email(self):
-        email = self.cleaned_data['email']
+        email = self.cleaned_data["email"]
         try:
-            User.objects.get(email=email)
-            raise forms.ValidationError(_("This email is taken before."))
+            email = User.objects.get(email=email)
+            raise forms.ValidationError(_('This email is taken before.'))
         except User.DoesNotExist:
-            return email
+            return self.cleaned_data['email']
 
-    def clean_password(self):
-        password1 = self.cleaned_data['password1']
-        password2 = self.cleaned_data['password2']
-
-        if password1 != password2:
-            raise forms.ValidationError(_("Typed an invalid email,"
-                                        "email might be taken by another"
-                                        "user."))
-
-        return self.cleaned_data['password1']
+    # def clean_password(self):
+    #     password = self.cleaned_data["password"]
+    #     password2 = self.cleaned_data["password2"]
+    #     if password != password2:
+    #         raise forms.ValidationError(_('Passwords are not matched.'))
+    #     else:
+    #         return password
 
 
 # Profile Informations and extras for registered users
 class UserProfileForm(forms.ModelForm):
-    username = forms.CharField(required=False, label='User name')
-    first_name = forms.CharField(required=False, label='First Name')
-    last_name = forms.CharField(required=False, label='Last Name')
+    first_name = forms.CharField(required=False, label=_('First Name'))
+    last_name = forms.CharField(required=False, label=_('Last Name'))
 
     class Meta:
         model = UserProfile
-        fields = ('username', 'first_name', 'last_name',
-                  'user_avatar', 'birth_date', 'gender')
+        fields = ('first_name', 'last_name',
+                  'birth_date', 'gender')
         widgets = {
             'gender': widgets.Select(choices=GENDER_CHOICES),
-            'birth_date': extras.SelectDateWidget(years=range(1940, 2013))
+            'birth_date': extras.SelectDateWidget(
+                years=range(1930, datetime.date.today().year))
         }
-
-    def clean_username(self):
-        username = self.cleaned_data['username']
-        try:
-            User.objects.get(username=username)
-            raise forms.ValidationError(_("This Username is taken before."))
-        except User.DoesNotExist:
-            return username
 
 
 #User can change email address, have to type password twice and
 #confirm the key which is sent by mail
 class EmailChangeForm(forms.Form):
-    email = forms.EmailField(
-        required=True,
-        label='new-email',
-        help_text=_('Enter the new email address.'
-                    ' Then, Apply the change with activation key.'))
+    email = forms.EmailField(required=True, label=_('new email'),
+                             help_text=_('Enter the new email address.'
+                                         ' Then, Verify with activation key.'))
 
     password = forms.CharField(widget=forms.PasswordInput,
                                required=True,
-                               label='Password',
-                               help_text=_('Enter your password'))
-
-    password_check = forms.CharField(widget=forms.PasswordInput,
-                                     required=True,
-                                     label='Retype-Password',
-                                     help_text=_('Enter your password again'))
+                               label=_('Password'))
 
     def clean_email(self):
-        if User.is_email_exists(self.cleaned_data['email']):
-            raise forms.ValidationError(_("You typed an invalid email."))
-
-        return self.cleaned_data['email']
-
-    def clean_password(self, user, request):
-
-        u = User.objects.get(username__exact=user.request.username)
-        password = self.cleaned_data['password']
-        password_check = self.cleaned_data['password_check']
-        if password != password_check:
-            raise forms.ValidationError(_("Typed password fields incorrect"))
-        elif u.check_password(password):
-            raise forms.ValidationError(_('Typed wrong password'))
-        return self.cleaned_data['password']
+        email = self.cleaned_data["email"]
+        try:
+            email = User.objects.get(email=email)
+            raise forms.ValidationError(_('This email is taken before.'))
+        except User.DoesNotExist:
+            return self.cleaned_data['email']
 
 
 # User can change Password, have to type actual password once and new one
 # twice, also have to confirm the key which is sent by mail
-class PasswordChangeForm(forms.Form):
-    # o_password is the user's old password
-    c_password = forms.CharField(widget=forms.PasswordInput,
-                                 required=True,
-                                 label='old-Password',
-                                 help_text=_('Enter old-Password'))
+class ChangePasswordForm(forms.Form):
 
-    c_password_check = forms.CharField(widget=forms.PasswordInput,
-                                       required=True,
-                                       label='Retype old-Password',
-                                       help_text=_('Again Enter old-Password'))
-
-    new_password = forms.CharField(widget=forms.PasswordInput,
+    old_password = forms.CharField(widget=forms.PasswordInput,
                                    required=True,
-                                   label='New-Password',
-                                   help_text=_('Rewrite Your Password'))
+                                   label=_('Old Password'))
 
-    password_check = forms.CharField(widget=forms.PasswordInput,
-                                     required=True,
-                                     label='Retype-New-Password',
-                                     help_text=_('New Password Again'))
+    new_password1 = forms.CharField(widget=forms.PasswordInput,
+                                    required=True,
+                                    label=_('New Password'))
+
+    new_password2 = forms.CharField(widget=forms.PasswordInput,
+                                    required=True,
+                                    label=_('New Password Again'))
 
     def clean_password(self):
-        # current password => c_password
-        c_password = UserProfile.objects.get(
-            password=self.cleaned_data['c_password'])
-        # c_password = self.cleaned_data['c_password']
-        c_password_check = self.cleaned_data['c_password_check']
-        new_password = self.cleaned_data['new_password']
-        password_check = self.cleaned_data['password_check']
-
-        if c_password != c_password_check:
-            raise forms.ValidationError(_("Typed passwords Wrong."))
-        elif c_password == new_password or new_password != password_check:
-            raise forms.ValidationError(_("Typed same password for new one"))
-
-        return self.cleaned_data['c_password']
+        new_password1 = self.cleaned_data["new_password1"]
+        new_password2 = self.cleaned_data["new_password2"]
+        if new_password1 != new_password2:
+            raise forms.ValidationError(_('Passwords are not matched.'))
+        else:
+            return new_password1
 
 
-# class AccountDisableForm(forms.Form):
+class AccountDisableForm(forms.Form):
+
+    password1 = forms.CharField(widget=forms.PasswordInput,
+                                required=True,
+                                label=_('Password'))
+
+    password2 = forms.CharField(widget=forms.PasswordInput,
+                                required=True,
+                                label=_('Password Again'))
+
+    def clean_password(self):
+        password1 = self.cleaned_data["password1"]
+        password2 = self.cleaned_data["password2"]
+        if password1 != password2:
+            raise forms.ValidationError(_('Passwords are not matched.'))
+        else:
+            return password1

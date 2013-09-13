@@ -10,17 +10,17 @@ class PostAddForm(forms.ModelForm):
 
     class Meta:
         model = Post
-        fields = ('title', 'text', 'post_image')
-        labels = {'title': "Title",
-                  'text': "Post Text",
-                  'post_image': "Post Image"}
+        fields = ('title', 'text')
+        labels = {'title': _('Title'),
+                  'text': _('Post Text'),
+                  'post_image': _('Post Image')}
         help_texts = {
             'title': _('Title can be 150 characters at most'),
             'post_image': _('You can add an image to your post.'),
         }
         error_messages = {
             'title': {
-                'max_length': _("This title is too long."),
+                'max_length': _('This title is too long.'),
             },
         }
 

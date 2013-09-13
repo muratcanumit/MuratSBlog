@@ -2,31 +2,60 @@
 {% load i18n %}
 {% load url from future %}
 
-{% block content %}
-{% if latest_post_list %}
-    <ul>
-    {% for post in latest_post_list %}
-        <hr />
-        <h3><a href="">{{ post.title }}</a></h3>
-        <p>{% trans "Written by" %} <a href="">{{ post.author }}</a> on {{ post.created_on }}</p>
-        <div class="row">
-          <div class="large-6 columns">
-            <p>{{ post.text }}</p>
-          </div>
-          <div class="large-6 columns">
-            <img src="http://placehold.it/400x240&text=[img]" />
-          </div>
-        </div>
 
-            <h5><a href="">{% trans "Read More" %}</a></h5>
-        <br />
-    {% endfor %}
+{% block content %}
+    {% if latest_post_list %}
+    <ul>
+        {% for post in latest_post_list %}
+            <hr />
+            <h3><a href="{% url 'detail' post.id %}">{{ post.title }}</a></h3>
+            <p><i>{% trans "Posted by" %} <a href="">{{ post.author.get_full_name }}</a> on {{ post.created_on }}</i></p>
+            <div class="row">
+                <div class="large-6 columns">
+                    <p>{{ post.text }}</p>
+                </div>
+                <div class="large-6 columns">
+                    <img src="" />
+                </div>
+            </div>
+
+            <h5><a href="{% url 'detail' post.id %}">{% trans "Show More" %}</a></h5><br />
+        {% endfor %}
     </ul>
     <hr />
-{% else %}
-    <p>No Posts are available.</p>
-{% endif %}
+    {% else %}
+        <p>No Posts are available.</p>
+    {% endif %}
 {% endblock %}
 
 
+{% block sidebar %}
 
+    <aside class="large-3 columns">
+    {% block categories %}
+        {% if user.is_authenticated %}
+            <ul class="side-nav">
+                <li><h4><a href="{% url 'postadd' %}">{% trans "Add Post" %}</a></h4></li>
+                <li><h4><a href="{% url 'logout' %}">{% trans "Logout" %}</a></h4></li>
+                <li><h4><a href="{% url 'profile' %}">{% trans "Profile" %}</a></h4></li>
+                <li><h4><a href="{% url 'all_articles' %}">{% trans "All Articles" %}</a></h4></li>
+                <li><h4><a href="{% url 'terms_of_use' %}">{% trans "Terms of Use" %}</a></h4></li>
+            </ul>
+        {% else %}
+            <ul class="side-nav">
+                <li><h4><a href="{% url 'login' %}">{% trans "Login" %}</a></h4></li>
+                <li><h4><a href="{% url 'register' %}">{% trans "Register" %}</a></h4></li>
+                <li><h4><a href="{% url 'all_articles' %}">{% trans "All Articles" %}</a></h4></li>
+                <li><h4><a href="{% url 'terms_of_use' %}">{% trans "Terms of Use" %}</a></h4></li>
+            </ul>
+        {% endif %}
+        <div class="panel">
+        {% block panel %}
+            <h5>News</h5>
+            <p>Blog Assignment with using Django Framework v1.4.5 and Python Programming Language. Also, there is HTML,CSS and JS.</p>
+             <!--<a href="">Read More &rarr;</a>-->
+        {% endblock %}
+        </div>
+        {% endblock %}
+    </aside>
+{% endblock %}

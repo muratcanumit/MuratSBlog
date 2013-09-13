@@ -263,7 +263,7 @@ select {
 
   .large-6 {
     position: relative;
-    width: 50%; }
+    width: 80%; }
 
   .large-7 {
     position: relative;

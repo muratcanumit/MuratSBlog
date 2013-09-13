@@ -1,39 +1,69 @@
-<html>
-<head><title></title></head>
-<body>
-<div>
-<h3> profile Page</h3>
-</div>
-<hr /> 
-<div>
-<i><h3>Profile Info</h3></i>
-<ul>
-	<li>User Name : {{ user.username }}</li>
-	<li>E-Mail Address : {{ user.email }}</li>
-	<li>Profile Picture : <br /><img src="/uploadedmedia/{{ user.userprofile.user_avatar}}" width="128"/>
-</li>
-</ul>
-</div>
+
+{% extends "base.html" %}
+{% load i18n %}
+{% load url from future %}
+
+
+{% block content %}
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+	{% endif %}
+<br />
+<h5><a href="{% url 'profile' %}"/>{% trans "Your Profile Page" %}</a></h5><hr />
+<b><i><p>{% trans "Your Information" %}</p></i></b>
+<p>{% trans "Your E-Mail Address" %} : {{ user.email }}</p>
+<p>{% trans "Name" %} :  {{ user.first_name }}</p>
+<p>{% trans "Last Name" %} :  {{ user.last_name }}</p>
+<p>{% trans "Gender" %} :  {{ user.userprofile.gender }}</p>
+<p>{% trans "Date of Birth" %} :  {{ user.userprofile.birth_date }}</p>
+
 <hr />
-<div>
-<h3> Edit Your Info </h3>
-{% if messages %}
-	<ul class="messages">
-		{% for message in messages %}
-			<li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-		{% endfor %}
-	</ul>
-{% endif %}
-<form enctype="multipart/form-data" action="/account/profile/" method="post">
+<b><i><p>{% trans "Change Your Information" %}</p></i></b>
+    <form enctype="multipart/form-data" action="/account/profile/" method="post">
 	{% csrf_token %}
 	{{ form.as_p }}
-	<input type="submit" value="Submit Changes">
-</form>
+	<input type="submit" value="Apply Changes">
+	</form>
 <hr />
-<a href=""><input type="submit" value="Change Password" /></a><br />
-<a href=""><input type="submit" value="Change Email" /></a><br />
+<b><i><p>{% trans "You can change your password" %}</p></i></b>
+<a href="{% url 'changepassword' %}"><input type="submit" value="Change Password" /></a><br /><br /><hr />
+<b><i><p>{% trans "You can change your email address." %}</p></i></b>
+<a href="{% url 'changeemail' %}"><input type="submit" value="Change Email" /></a><br /><br /><hr />
+<b><i><p>{% trans "You can Disable Your Account." %}</p></i></b>
+<a href="{% url 'disableaccount' %}"><input type="submit" value="Disable My Account" /></a><br /><br /><hr />
 <hr />
-<a href="{% url homepage %}"><input type="submit" value="Back to Home Page" /></a><br />
-</div>
-</body>
-</html>
+{% endblock %}
+
+{% block sidebar %}
+
+    <aside class="large-3 columns">
+    {% block categories %}
+        {% if user.is_authenticated %}
+            <ul class="side-nav">
+                <li><h4><a href="{% url 'logout' %}">{% trans "Logout" %}</a></h4></li>
+                <li><h4><a href="{% url 'index' %}">{% trans "Homepage" %}</a></h4></li>
+                <li><h4><a href="">{% trans "My Articles" %}</a></h4></li>
+                <li><h4><a href="{% url 'terms_of_use' %}">{% trans "Terms of Use" %}</a></h4></li>
+            </ul>
+        {% else %}
+            <ul class="side-nav">
+                <li><h4><a href="{% url 'login' %}">{% trans "Login" %}</a></h4></li>
+                <li><h4><a href="{% url 'register' %}">{% trans "Register" %}</a></h4></li>
+                <li><h4><a href="{% url 'all_articles' %}">{% trans "All Articles" %}</a></h4></li>
+                <li><h4><a href="{% url 'terms_of_use' %}">{% trans "Terms of Use" %}</a></h4></li>
+            </ul>
+        {% endif %}
+        <div class="panel">
+        {% block panel %}
+            <h5>News</h5>
+            <p>Blog Assignment with using Django Framework v1.4.5 and Python Programming Language. Also, there is HTML,CSS and JS.</p>
+             <!--<a href="">Read More &rarr;</a>-->
+        {% endblock %}
+        </div>
+        {% endblock %}
+    </aside>
+{% endblock %}

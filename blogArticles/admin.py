@@ -32,7 +32,7 @@ admin.site.register(Comment, CommentAdmin)
 
 class UserProfileAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None, {'fields': ['user_avatar', 'birth_date', 'gender',
+        (None, {'fields': ['birth_date', 'gender',
                 'is_verified', 'act_key', 'exp_key']}),
     ]
 

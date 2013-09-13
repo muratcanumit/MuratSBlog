@@ -1,23 +1,19 @@
-<html>
-<head><title></title></head>
-<body>
-<div>
-<h3>Login form Page</h3>
-</div>
-<hr />
-<div>
-{% if messages %}
-	<ul class="messages">
-		{% for message in messages %}
-			<li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-		{% endfor %}
-	</ul>
-{% endif %}
+{% extends "base.html" %}
+{% load i18n %}
+{% load url from future %}
+
+
+{% block content %}
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
 <form action="/login/" method="post">
-	{% csrf_token %}
-	{{ form.as_p }}
-	<input type="submit" value="Login">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Login">
 </form>
-</div>
-</body>
-</html>
+{% endblock %}

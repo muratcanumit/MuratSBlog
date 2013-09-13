@@ -1,43 +1,19 @@
 import datetime
-from django.http import HttpResponseRedirect
+from random import choice
+from string import letters
 from django.core.urlresolvers import reverse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.translation import ugettext as _
-
-from blogArticles.models import Post, Comment
 from accounts.models import UserProfile
 from accounts.forms import (LoginForm, RegisterForm,
                             UserProfileForm, EmailChangeForm,
-                            PasswordChangeForm)
-from blogArticles.forms import PostAddForm
-
-
-@login_required
-def homepage(request):
-    latest_post_list = Post.objects.all().order_by('-created_on')[:10]
-    users = User.objects.all()
-    return render(request, 'blogArticles/homepage.html',
-                  {'latest_post_list': latest_post_list, 'users': users})
-
-
-def detailed(request, post_id):
-    p = get_object_or_404(Post, pk=post_id)
-    ct_post = ContentType.objects.get_for_model(Post)
-    post_comments = Comment.objects.filter(entity=post_id).order_by(
-        'created_on').filter(content_type=ct_post)
-
-    ct_comment = ContentType.objects.get_for_model(Comment)
-    comment_list = Comment.objects.filter(entity=post_id).order_by(
-        'created_on').filter(content_type=ct_comment)
-    # return redirect(request, reverse('urls_name'))
-    return render(request, 'blogArticles/postdetailed.html',
-                  {'post': p, 'comment_list': comment_list,
-                   'post_comment_list': post_comments})
+                            ChangePasswordForm, AccountDisableForm)
+from accounts import tasks
 
 
 def loginPage(request):
@@ -51,53 +27,80 @@ def loginPage(request):
                                 )
 
             if user is not None:
-                if user.is_active is False:
+                if user.is_active is False and user.userprofile.is_verified is False:
                     messages.error(request,
                                    _('Verify account with activation key.'))
-                    return HttpResponseRedirect(reverse('login'))
-                elif user.is_active is True:
+                    return redirect(reverse('login'))
+                elif user.is_active is True and user.userprofile.is_verified is True:
                     login(request, user)
-                    messages.success(request, _('Logged in Successful.'))
-                    return HttpResponseRedirect(reverse('homepage'))
+                    return redirect(reverse('index'))
 
             else:
                 messages.error(
                     request,
-                    _('Login Failed. Invalid Username or Password. Try Again.')
+                    _('Invalid Email or Password. If new '
+                      'Registered Verify your account with the email.')
                 )
-                return HttpResponseRedirect(reverse('login'))
+                return redirect(reverse('login'))
     else:
         form = LoginForm()
     return render(request, 'accounts/login.html', {'form': form})
 
 
-@login_required
+@login_required(login_url='/login/')
 def logoutPage(request):
     logout(request)
-    return HttpResponseRedirect('/')
+    return redirect('/')
 
 
 def registerPage(request):
-    messages.info(request, _('Your user name will automatically be email.'
-                             'You need to change your username after login.'))
+
     if request.method == 'POST':
-        form = RegisterForm(request.POST)
+        data = request.POST.copy()
+        form = RegisterForm(data)
+
         if form.is_valid():
-            user = form.save()
-            user.is_active = False
-            user.username = user.email
-            user.save()
-            messages.success(request, _('Successfully Registered.'))
-            return HttpResponseRedirect(reverse('login'))
+            data['username'] = ''.join([choice(letters) for i in xrange(30)])
+            # data['password'] = ''.join([choice(letters) for i in xrange(30)])
+            if form.cleaned_data['password'] != form.cleaned_data['password2']:
+                messages.error(request, _('Passwords are not matched.'))
+                form = RegisterForm()
+            else:
+
+                act_key = tasks.generate_activation_key(data['email'])
+                exp_key = tasks.generate_key_expires_date()
+                # tasks.send_activation_code(act_key, data['email'])
+
+                user = form.save()
+                user.set_password(form.cleaned_data['password'])
+                user.username = data['username']
+                user.email = form.cleaned_data['email']
+                user.first_name = form.cleaned_data['first_name']
+                user.last_name = form.cleaned_data['last_name']
+                user.is_active = False
+                user.save()
+                try:
+                    userprofile = user.userprofile
+                except UserProfile.DoesNotExist:
+                    userprofile = form.instance
+
+                userprofile.user = user
+                userprofile.is_verified = False
+                userprofile.act_key = act_key
+                userprofile.exp_key = exp_key
+                userprofile.save()
+                messages.success(request, _('Registered!'))
+                return redirect(reverse('login'))
         else:
-            messages.error(request, _('Fields have to be correctly filled.'))
-            return HttpResponseRedirect(reverse('register'))
+            messages.error(request, _('Please Fill Fields Correctly.'))
+            form = RegisterForm()
     else:
         form = RegisterForm()
+
     return render(request, 'accounts/register.html', {'form': form})
 
 
-@login_required
+@login_required(login_url='/login/')
 def editProfile(request):
     user = request.user
     if request.method == 'POST':
@@ -112,91 +115,141 @@ def editProfile(request):
             userprofile.is_verified = True
             userprofile.act_key = "1111"
             userprofile.exp_key = datetime.datetime.now()
-            user.username = form.cleaned_data['username']
+            userprofile.gender = form.cleaned_data['gender']
+            userprofile.birth_date = form.cleaned_data['birth_date']
             user.first_name = form.cleaned_data['first_name']
             user.last_name = form.cleaned_data['last_name']
             user.save()
             userprofile.save()
             messages.success(request, _('Changes are done.'))
-            return HttpResponseRedirect(reverse('homepage'))
+            return redirect(reverse('profile'))
         else:
             messages.error(request, _('Edit is failed.'))
+            return redirect(reverse('register'))
     else:
         form = UserProfileForm()
+
     return render(request, 'accounts/profile.html', {'form': form})
 
 
-@login_required
-def postAdd(request):
-    if request.method == 'POST':
-        form = PostAddForm(request.POST)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.save()
-            messages.success(request, _('Post Added !'))
-            return HttpResponseRedirect(reverse('homepage'))
-        else:
-            messages.error(request, _('Post was not Added !'))
-    else:
-        form = PostAddForm()
-    return render(request, 'blogArticles/postadd.html', {'form': form})
-
-
-@login_required
-def emailChange(request):
+@login_required(login_url='/login/')
+def change_email(request):
+    user = request.user
+    data = request.POST.copy()
     if request.method == 'POST':
         form = EmailChangeForm(request.POST)
         if form.is_valid():
-            user = request.user.get_profile()
-            user.email = form.save()
-            user.is_verified = False
-            user.is_active = False
-            user.save()
-            messages.success(request,
-                             _('Email is changed. Verification mail sent.'))
-            return HttpResponseRedirect(reverse('index'))
+            if user.check_password(form.cleaned_data['password']) is False:
+                messages.error(request, _('Password is wrong.'))
+                form = ChangePasswordForm()
+            else:
+                user.email = form.cleaned_data['email']
+                user.is_active = False
+                user.save()
+
+                act_key = tasks.generate_activation_key(data['email'])
+                exp_key = tasks.generate_key_expires_date()
+                # tasks.send_activation_code(act_key, data['email'])
+
+                try:
+                    userprofile = user.userprofile
+                except UserProfile.DoesNotExist:
+                    userprofile = form.instance
+
+                userprofile.user = user
+                userprofile.is_verified = False
+                userprofile.act_key = act_key
+                userprofile.exp_key = exp_key
+                userprofile.save()
+
+                messages.success(request,
+                                 _('Email is changed. Verification mail sent.'))
+            return redirect(reverse('index'))
         else:
-            messages.error(request, _('Process failed. Try again.'))
-            return HttpResponseRedirect(reverse('changeemail'))
+            messages.error(request, _('Change failed. Enter your Password Correct.'))
+            return redirect(reverse('changeemail'))
     else:
-            messages.error(request, _('Process failed. Try again.'))
-            form = EmailChangeForm()
-    return render(request, 'accounts/emailchange.html', {'form': form})
+        form = EmailChangeForm()
+    return render(request, 'accounts/email_change.html', {'form': form})
 
 
-@login_required
-def passwordChange(request):
-    if request.method == 'POST':
-        form = PasswordChangeForm(request.POST)
+@login_required(login_url='/login/')
+def change_password(request):
+    user = request.user
+    if request.method == "POST":
+        form = ChangePasswordForm(request.POST)
         if form.is_valid():
-            user = request.user.get_profile()
-            user.password = form.save()
-            user.save()
-            messages.success(request,
-                             _('Password has changed.Verification mail sent.'))
-            return HttpResponseRedirect(reverse('index'))
+            if user.check_password(form.cleaned_data['old_password']) is False:
+                messages.error(request, _('Password is wrong.'))
+                form = ChangePasswordForm()
+            elif form.cleaned_data['new_password1'] != form.cleaned_data['new_password2']:
+                messages.error(request, _('Passwords are not matched.'))
+                form = ChangePasswordForm()
+            else:
+                user.set_password(form.cleaned_data['new_password1'])
+                user.save()
+                messages.success(request, _('Password changed'))
+            return redirect(reverse('profile'))
         else:
-            messages.error(request, _('Process failed. Try again.'))
-            return HttpResponseRedirect(reverse('changepassword'))
+            messages.error(request, _('Change is failed.'))
+            return redirect(reverse('changepassword'))
     else:
-        messages.error(request, _('Process failed. Try again.'))
-        form = PasswordChangeForm()
-    return render(request, 'accounts/passwordchange.html', {'form': form})
+        form = ChangePasswordForm()
+    return render(request, 'accounts/change_password.html', {'form': form})
 
 
-# @login_required
-# def disableAccount(request):
-#     if request.method == 'POST':
-#         form = AccountDisableForm(request.POST)
-#         if form.is_valid():
-#             user = User.objects.get(request.user)
-#             user.is_active = False
-#             user.is_verified = False
-#             user.save()
-#             messages.success(request, _('Account disabled. Good Bye.'))
-#             return HttpResponseRedirect(reverse('index'))
-#         else:
-#             messages.error(request, _('Process Failed, Try Again.'))
-#             form = AccountDisableForm()
-#     return render(request, 'accounts/accountdisable.html', {'form': form})
+@login_required(login_url='/login/')
+def disable_account(request):
+    user = request.user
+    if request.method == "POST":
+        form = AccountDisableForm(request.POST)
+        if form.is_valid():
+            if user.check_password(form.cleaned_data['password1']) is False:
+                messages.error(request, _('Password is wrong.'))
+                form = AccountDisableForm()
+            elif form.cleaned_data['password1'] != form.cleaned_data['password2']:
+                messages.error(request, _('Passwords are not matched.'))
+                form = AccountDisableForm()
+            else:
+                user = User.objects.get(request.user)
+                user.is_active = False
+                user.save()
+                messages.success(request, _('Account disabled. Good Bye.'))
+            return redirect(reverse('index'))
+        else:
+            messages.error(request, _('You Typed Wrong Passwords, Try Again.'))
+            return redirect(reverse('disableaccount'))
+    else:
+        form = AccountDisableForm()
+    return render(request, 'accounts/disable_account.html', {'form': form})
+
+
+def verify_user(request, act_key):
+
+    userprofile = get_object_or_404(UserProfile, act_key=act_key)
+    if not userprofile.is_verified:
+        if not tasks.is_key_expires(userprofile.exp_key):
+            dic = {"message": _('Account is activated')}
+            userprofile.user.is_active = True
+            userprofile.is_verified = True
+            userprofile.save()
+            userprofile.user.save()
+        else:
+            dic = {"message": _('Activation key is expired')}
+    else:
+        dic = {"message": _('You Are Active.')}
+    return render(request, 'accounts/activate_user.html', dic)
+
+
+def terms_of_use(request):
+    return render(request, 'accounts/terms_of_use.html')
+
+
+def social(request):
+    return render(request, 'accounts/social.html')
+
+
+def authors(request):
+    authors = User.objects.filter(is_active=True).order_by('date_joined')
+    return render(request, 'accounts/authors.html',
+                  {'authors': authors})

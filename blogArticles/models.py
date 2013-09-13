@@ -17,7 +17,7 @@ class Post(models.Model):
     comments = GenericRelation('Comment')
 
     def __unicode__(self):
-        return u"%s" % self.title
+        return u"%s" % self.id
 
     #to order comments by date reverse
     class Meta:
@@ -39,7 +39,7 @@ class Comment(models.Model):
     email = models.EmailField()
 
     def __unicode__(self):
-        return u"%s" % self.text
+        return u"%s" % self.id
 
     #to order comments by date reverse
     class Meta:

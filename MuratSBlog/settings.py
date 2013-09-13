@@ -1,5 +1,7 @@
 # Django settings for MuratSBlog project.
 import os
+import djcelery
+djcelery.setup_loader()
 
 PROJECT_ROOT = lambda x: os.path.normpath(os.path.join(x, '..'))
 PROJECT_DIR = PROJECT_ROOT(os.path.dirname(__file__))
@@ -62,7 +64,7 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = os.path.join(PROJECT_DIR, 'uploadedmedia')
+MEDIA_ROOT = os.path.join(PROJECT_DIR, 'uploadedmedia/')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -73,18 +75,18 @@ MEDIA_URL = '/uploadedmedia/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
+STATIC_ROOT = os.path.join(PROJECT_DIR, 'static/')
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = 'static'
+STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(PROJECT_DIR, 'static/blog/'), 
+    os.path.join(PROJECT_DIR, 'static/blog/'),
 )
 
 # List of finder classes that know how to find static files in
@@ -146,6 +148,7 @@ INSTALLED_APPS = (
     'blogArticles',
     'accounts',
     'debug_toolbar',
+    'djcelery',
 )
 
 AUTH_PROFILE_MODULE = (
@@ -201,7 +204,7 @@ DEBUG_TOOLBAR_PANELS = (
 )
 
 AUTHENTICATION_BACKENDS = (
-    'accounts.backends.EmailAuthenticateBackends',
+    'accounts.backends.EmailAuthBackends',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -211,4 +214,30 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.static',
     'django.contrib.auth.context_processors.auth',
     'django.contrib.messages.context_processors.messages',
+)
+
+LOGIN_URL = '/login/'
+
+KEY_EXPIRES_DATE = 1
+
+BROKER_URL = 'amqp://guest:guest@localhost:5672/'
+
+djcelery.setup_loader()
+CELERY_IMPORTS = ("accounts.tasks", )
+# CACHES = {
+#     "default": {
+#         "BACKEND": "redis_cache.cache.RedisCache",
+#         "LOCATION": "127.0.0.1:6379",
+#         "OPTIONS": {
+#             "CLIENT_CLASS": "redis_cache.client.DefaultClient",
+#         }
+#     }
+# }
+LOCALE_PATHS = (
+    os.path.join(PROJECT_DIR, 'locale'),
+)
+ugettext = lambda s: s
+LANGUAGES = (
+    ('tr', u'Turkish'),
+    ('en-us', u'English'),
 )
