@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load url from future %}
+
+
+{% block content %}
+    <br /><p>{% trans "Authors" %}</p><hr />
+    {% if authors %}
+    <ul>
+        {% for author in authors %}
+            <p>{{ author.get_full_name }}</p>
+        {% endfor %}
+    </ul>
+    {% else %}
+        <p>{% trans "No Author exists." %}</p>
+    {% endif %}
+{% endblock %}
+
+
+    
+{% block sidebar %}
+
+    <aside class="large-3 columns">
+    {% block categories %}
+        {% if user.is_authenticated %}
+            <ul class="side-nav">
+                <li><h4><a href="{% url 'postadd' %}">{% trans "Add Post" %}</a></h4></li>
+                <li><h4><a href="{% url 'logout' %}">{% trans "Logout" %}</a></h4></li>
+                <li><h4><a href="{% url 'profile' %}">{% trans "Profile" %}</a></h4></li>
+                <li><h4><a href="{% url 'all_articles' %}">{% trans "All Articles" %}</a></h4></li>
+                <li><h4><a href="{% url 'terms_of_use' %}">{% trans "Terms of Use" %}</a></h4></li>
+            </ul>
+        {% else %}
+            <ul class="side-nav">
+                <li><h4><a href="{% url 'login' %}">{% trans "Login" %}</a></h4></li>
+                <li><h4><a href="">{% trans "Register" %}</a></h4></li>
+                <li><h4><a href="{% url 'all_articles' %}">{% trans "All Articles" %}</a></h4></li>
+                <li><h4><a href="{% url 'terms_of_use' %}">{% trans "Terms of Use" %}</a></h4></li>
+            </ul>
+        {% endif %}
+        <div class="panel">
+        {% block panel %}
+            <h5>News</h5>
+            <p>Blog Assignment with using Django Framework v1.4.5 and Python Programming Language. Also, there is HTML,CSS and JS.</p>
+             <!--<a href="">Read More &rarr;</a>-->
+        {% endblock %}
+        </div>
+        {% endblock %}
+    </aside>
+{% endblock %}
